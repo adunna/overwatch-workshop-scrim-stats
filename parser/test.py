@@ -1,7 +1,7 @@
-import parser
-import analyzer
+import owssparser
+import owssanalyzer
 
-parsed_data = parser.parse("../samples/workshop_output1.txt")
-parser.write_csv(parsed_data, "../samples/workshop_output1.csv")
+parsed_data = owssparser.parse("../samples/workshop_output1.txt")
+owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
 
-player_stats, player_stats_summary = analyzer.analyze("../samples/workshop_output1.csv")
+player_stats, player_stats_summary = owssanalyzer.analyze("../samples/workshop_output1.csv")

@@ -1,0 +1,65 @@
+INFRA:
+
+- python webapp base (maybe flask?)
+-- something host on github, so javascript would be better i think
+
+OTHER TOOL IDEAS:
+
+- share replay codes amongst team(s)? can keep track of patches and add notes to them, make them available to teams
+
+WORKSHOP CHANGES:
+
+- log map & game mode at beginning in first row
+- log general map things over time separately from each player's row, so we don't have the same variables repeated
+
+directly available player stats:
+
+- all damage dealt
+- barrier damage dealt
+- damage blocked
+- damage taken
+- deaths
+- elims
+- final blows
+- enviro deaths
+- enviro kills
+- hero damage dealt
+- healing dealt
+- objective kills
+- solo kills
+- ultimates earned
+- ultimates used
+(hero section)
+- healing received
+(other section)
+- ult charge over time
+- player closest to reticle
+
+map stats:
+
+- payload progress percentage / point capture percentage /  (make sure to set dependent on map)
+
+derived player stats:
+
+- stuff per 10
+- time to ult
+-- time ult held
+- time staggered (death after fight)
+- feed deaths (death before fight)
+- ult efficiency (ults earned / ults used)
+- poke damage taken (damage before fight)
+
+derived fight stats:
+
+- first ult
+- first deaths
+- focus fire during fight
+-- use player closest to reticle
+- grouped-ness
+- rotation time
+
+other ideas:
+
+- meta-dependent stats, ex:
+-- double shield
+--- peeking without shield?
