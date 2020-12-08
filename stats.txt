@@ -11,10 +11,29 @@ WORKSHOP CHANGES:
 
 - log map & game mode at beginning in first row
 - log general map things over time separately from each player's row, so we don't have the same variables repeated
+-- match time, 
 
-directly available player stats:
+s01 = s02, s03, s04
 
-- all damage dealt
+s02 = s05, s06, s07
+s03 = s08, s09, s10
+s04 = s11, s12, s13
+
+s05 = s14, s15, s16
+s06 = s17, s18, s19
+s07 = s20, s21, s22
+s08 = s23, s24, s25
+s09 = s26, s27, s28
+s10 = s29, s30, s31
+s11 = s32, s33, s34
+s12 = s35, s36, s37
+s13 = s38, s39, s40
+
+
+directly available player stats: (22 vars)
+
+- timestamp, player name, hero, and team
+- hero damage dealt
 - barrier damage dealt
 - damage blocked
 - damage taken
@@ -23,7 +42,6 @@ directly available player stats:
 - final blows
 - enviro deaths
 - enviro kills
-- hero damage dealt
 - healing dealt
 - objective kills
 - solo kills
@@ -34,6 +52,7 @@ directly available player stats:
 (other section)
 - ult charge over time
 - player closest to reticle
+- xyz position
 
 map stats:
 

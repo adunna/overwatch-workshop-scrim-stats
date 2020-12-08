@@ -1,0 +1,10 @@
+- at beginning of map, logs current map
+
+- global log every second
+-- KOTH: total time elapsed, KOTH team 1 percentage, KOTH team 2 percentage
+-- Escort: total time elapsed, team 1 attacking true/false, payload progress percentage
+-- Assault: total time elapsed, team 1 attacking true/false, point capture percentage
+-- Hybrid: total time elapsed, team 1 attacking true/false, point capture percentage THEN payload progress percentage afterwards
+
+- player log every second
+-- total time elapsed, player name, hero, hero damage dealt, barrier damage dealt, damage blocked, damage taken, deaths, elims, final blows, enviro deaths, enviro kills, healing dealt, objective kills, solo kills, ults earned, ults used, healing received, ult charge percent, player closest to reticle, player position (X, Y, Z), (IN NEW VERSION) team 1 or team 2
