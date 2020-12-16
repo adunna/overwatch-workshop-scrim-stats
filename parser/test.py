@@ -1,7 +1,10 @@
-import owssparser
-import owssanalyzer
+from mparser import MatrixParser
+from manalyzer import MatrixAnalyzer
 
-parsed_data = owssparser.parse("../samples/workshop_output1.txt")
-owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
+parseEngine = MatrixParser()
+game = parseEngine.readLog("../samples/map1.txt")
+analyzer = MatrixAnalyzer(game)
 
-player_stats, player_stats_summary = owssanalyzer.analyze("../samples/workshop_output1.csv")
+#owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
+
+#player_stats, player_stats_summary = owssanalyzer.analyze("../samples/workshop_output1.csv")

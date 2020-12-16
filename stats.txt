@@ -60,13 +60,13 @@ map stats:
 
 derived player stats:
 
-- stuff per 10
-- time to ult
--- time ult held
-- time staggered (death after fight)
-- feed deaths (death before fight)
+done- stuff per 10
+done- time to ult
+done-- time ult held
+done- time staggered (death after fight)
+done- feed deaths (death before fight)
 - ult efficiency (ults earned / ults used)
-- poke damage taken (damage before fight)
+done- poke damage taken (damage before fight)
 
 derived fight stats:
 
@@ -74,7 +74,7 @@ derived fight stats:
 - first deaths
 - focus fire during fight
 -- use player closest to reticle
-- grouped-ness
+done- grouped-ness
 - rotation time
 
 other ideas:
@@ -82,3 +82,5 @@ other ideas:
 - meta-dependent stats, ex:
 -- double shield
 --- peeking without shield?
+
+

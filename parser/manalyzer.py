@@ -1,0 +1,253 @@
+from collections import defaultdict
+from mgame import MatrixGame
+
+class MatrixAnalyzer:
+
+    def __init__(self, game):
+        self.game = game
+
+    # Get names of all players, form of {player: team, ...}
+    def GetPlayers(self):
+        players = {} # playername: team
+        for section in self.game.player_tracking:
+            for team in section:
+                for player in team:
+                    players[player] = team[player].team
+        return players
+
+    # Get team for given player
+    def GetTeam(self, player):
+        return 0 if player in self.game.player_tracking[0][0] else 1
+
+    # Get death timestamps for given player for each section
+    def GetDeaths(self, player, team=None):
+        if team is None:
+            team = self.GetTeam(player)
+        death_times = []
+        num_deaths = 0
+        for section in range(0, len(self.game.player_tracking)):
+            sec_death_times = []
+            for timestamp in range(0, len(self.game.player_tracking[section][team][player].stats['deaths'])):
+                if self.game.player_tracking[section][team][player].stats['deaths'][timestamp] > num_deaths:
+                    num_deaths += 1
+                    sec_death_times.append(timestamp)
+            death_times.append(sec_death_times)
+        return death_times
+
+    # Get final stat for given player
+    def GetFinalStat(self, player, stat, team=None):
+        if team == None:
+            team = self.GetTeam(player)
+        if stat == 'all_damage_dealt':
+            return self.game.player_tracking[-1][team][player].stats['hero_damage_dealt'][-1] + self.game.player_tracking[-1][team][player].stats['barrier_damage_dealt'][-1]
+        else:
+            return self.game.player_tracking[-1][team][player].stats[stat][-1]
+
+    # Get stat per minute for given player
+    def GetStatPerMinute(self, player, stat, team=None):
+        if team == None:
+            team = self.GetTeam(player)
+        statSum = self.GetFinalStat(player, stat, team)
+        if stat == 'all_damage_dealt':
+            statCount = sum([len(section[team][player].stats['hero_damage_dealt']) for section in self.game.player_tracking])
+        else:
+            statCount = sum([len(section[team][player].stats[stat]) for section in self.game.player_tracking])
+        return (statSum / statCount) * 60
+
+    # Get times ultimates used for given player, for each section
+    def GetTimesUltimateUsed(self, player, team=None):
+        if team is None:
+            team = self.GetTeam(player)
+        pass # TODO 
+
+    # Get time to ultimate (in seconds) for each ultimate for given player
+    def GetTimesToUltimate(self, player, team=None):
+        if team == None:
+            team = self.GetTeam(player)
+        times_to_ult = []
+        prev_ults_earned = 0
+        for section in self.game.player_tracking:
+            time_to_ult = 0
+            for i in range(0, len(section[team][player].stats['ultimates_earned'])):
+                if section[team][player].stats['ultimates_earned'][i] != prev_ults_earned:
+                    times_to_ult.append(time_to_ult)
+                    time_to_ult = 0
+                else:
+                    if section[team][player].stats['ultimates_earned'][i] == section[team][player].stats['ultimates_used'][i]:
+                        time_to_ult += 1
+                prev_ults_earned = section[team][player].stats['ultimates_earned'][i]
+        return times_to_ult
+
+    # Get time ultimate held (in seconds) for each ultimate for given player
+    def GetTimesUltimateHeld(self, player, team=None):
+        if team == None:
+            team = self.GetTeam(player)
+        times_ult_held = []
+        for section in self.game.player_tracking:
+            time_ult_held = 0
+            for i in range(0, len(section[team][player].stats['ultimates_earned'])):
+                if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_used'][i]:
+                    time_ult_held += 1
+                else:
+                    if time_ult_held > 0:
+                        times_ult_held.append(time_ult_held)
+                        time_ult_held = 0
+        if time_ult_held > 0:
+            times_ult_held.append(time_ult_held)
+        return times_ult_held
+
+    # Get average time to ultimate (in seconds) for given player
+    def GetAverageTimeToUltimate(self, player, team=None):
+        times_to_ult = self.GetTimesToUltimate(player, team)
+        return sum(times_to_ult) / len(times_to_ult)
+
+    # Get average time ultimate held (in seconds) for given player
+    def GetAverageTimeUltimateHeld(self, player, team=None):
+        times_ult_held = self.GetTimesUltimateHeld(player, team)
+        return sum(times_ult_held) / len(times_ult_held)
+
+    # Segment game data into fights by sections [[(start, end), ...], ...]
+    def GetFights(self):
+        rand_player = list(self.game.player_tracking[0][0].keys())[0]
+        fights = []
+        for section in range(0, len(self.game.player_tracking)):
+            fight_starts = []
+            fight_ends = []
+            in_fight = 0
+            maxlen = len(self.game.player_tracking[section][0][rand_player].stats['hero_damage_dealt'])
+            for i in range(0, maxlen):
+                damage = self.GetTotalDamage(section, i)
+                if damage >= 250 and in_fight == 0:
+                    in_fight = 1
+                    fight_starts.append(i)
+                elif damage >= 250 and in_fight > 1:
+                    in_fight = 1
+                elif damage < 250 and in_fight >= 1 and in_fight < 6:
+                    in_fight += 1
+                elif damage < 250 and in_fight >= 6:
+                    in_fight = 0
+                    fight_ends.append(i)
+                if in_fight >= 1 and i == maxlen - 1:
+                    in_fight = 0
+                    fight_ends.append(i)
+            fights.append([(fight_starts[x], fight_ends[x]) for x in range(0, len(fight_starts))])
+        ret_fights = []
+        for section in fights:
+            filtered_fights = [section[0]]
+            for i in range(1, len(section)):
+                if section[i][0] - 6 <= filtered_fights[-1][1]:
+                    filtered_fights[-1] = (filtered_fights[-1][0], section[i][1])
+                else:
+                    filtered_fights.append(section[i])
+            ret_fights.append(filtered_fights)
+        return ret_fights
+
+    # Get first ult used in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
+    def GetFirstUltUsedInFights(self):
+        fights = self.GetFights()
+        for section in range(0, len(fights)):
+            pass # TODO
+
+    # Get stagger/feed deaths format (num_deaths, [[ts, ...], ...]) for a given player name
+    def GetFeedDeaths(self, player, team=None):
+        if team is None:
+            team = self.GetTeam(player)
+        fights = self.GetFights()
+        death_times = self.GetDeaths(player, team)
+        feed_deaths = []
+        numFeedDeaths = 0
+        for section in range(0, len(fights)):
+            sec_feed_deaths = []
+            for dtime in death_times[section]:
+                foundDeath = False
+                f = 0
+                while not foundDeath and f < len(fights[section]):
+                    if dtime >= fights[section][f][0] and dtime <= fights[section][f][1]:
+                        foundDeath = True
+                    f += 1
+                if not foundDeath:
+                    sec_feed_deaths.append(dtime)
+                    numFeedDeaths += 1
+            feed_deaths.append(sec_feed_deaths)
+        return numFeedDeaths, feed_deaths
+
+    # Get all poke damage taken for given player name
+    def GetPokeDamage(self, player, team=None):
+        if team is None:
+            team = self.GetTeam(player)
+        fights = self.GetFights()
+        poke_dmg = 0
+        prev_dmg_taken = 0
+        for section in range(0, len(fights)):
+            fight_ptr = 0
+            for timestamp in range(0, len(self.game.player_tracking[section][team][player].stats['damage_taken'])):
+                prev_dmg_taken = self.game.player_tracking[section][team][player].stats['damage_taken'][timestamp] if timestamp == 0 else self.game.player_tracking[section][team][player].stats['damage_taken'][timestamp - 1]
+                if timestamp < fights[section][fight_ptr][0]:
+                    poke_dmg += self.game.player_tracking[section][team][player].stats['damage_taken'][timestamp] - prev_dmg_taken
+                elif timestamp >= fights[section][fight_ptr][1]:
+                    fight_ptr += 1
+        return poke_dmg
+
+    # Get stagger/feed deaths for all players
+    def GetAllFeedDeaths(self):
+        players = list(self.GetPlayers().keys())
+        feed_deaths = {}
+        for player in players:
+            feed_deaths[player] = self.GetFeedDeaths(player)
+        return feed_deaths
+
+    # Get total damage at given section and timestamp
+    def GetTotalDamage(self, section, timestamp):
+        if timestamp == 0:
+            if section == 0:
+                damages = [sum([team[player].stats['hero_damage_dealt'][timestamp] + team[player].stats['barrier_damage_dealt'][timestamp] for player in team]) for team in self.game.player_tracking[section]]
+            else:
+                return self.GetTotalDamage(section - 1, -1)
+        else:
+            damages = [sum([team[player].stats['hero_damage_dealt'][timestamp] - team[player].stats['hero_damage_dealt'][timestamp - 1] + team[player].stats['barrier_damage_dealt'][timestamp] - team[player].stats['barrier_damage_dealt'][timestamp - 1] for player in team]) for team in self.game.player_tracking[section]]
+        return sum(damages)
+
+    # Get total damages over all time
+    def GetAllTotalDamages(self):
+        damages = []
+        for section in range(0, len(self.game.player_tracking)):
+            for timestamp in range(0, len(self.game.player_tracking[section][0][list(self.game.player_tracking[section][0].keys())[0]].stats['hero_damage_dealt'])):
+                damages.append(self.GetTotalDamage(section, timestamp))
+        return damages
+
+    # Get hero damage dealt for given player
+    def GetHeroDamageDealt(self, player, team=None):
+        return self.GetFinalStat(player, 'hero_damage_dealt', team)
+
+    # Get barrier damage dealt for given player
+    def GetBarrierDamageDealt(self, player, team=None):
+        return self.GetFinalStat(player, 'barrier_damage_dealt', team)
+
+    # Get (avg distance, cumulative distance) in meters for given players at given timestamp in given section
+    def GetGroupedness(self, players, section, timestamp, team=None):
+        if team == None:
+            team = self.GetTeam(players[0])
+        positions = [self.game.player_tracking[section][team][player].stats['position'][timestamp] for player in players]
+        x_pos = [position[0] for position in positions]
+        y_pos = [position[1] for position in positions]
+        z_pos = [position[2] for position in positions]
+        center = (sum(x_pos)/len(x_pos), sum(y_pos)/len(y_pos), sum(z_pos)/len(z_pos))
+        cumulative_dist_x = [abs(center[0] - x) for x in x_pos]
+        cumulative_dist_y = [abs(center[1] - y) for y in y_pos]
+        cumulative_dist_z = [abs(center[2] - z) for z in z_pos]
+        cumulative_dist = sum(cumulative_dist_x) + sum(cumulative_dist_y) + sum(cumulative_dist_z)
+        avg_dist = cumulative_dist / len(players)
+        return (avg_dist, cumulative_dist)
+
+    # Get average of (avg distance, cumulative distance) in meters for given players over all time
+    def GetOverallGroupedness(self, players, team=None):
+        if team == None:
+            team = self.GetTeam(players[0])
+        avg_dists = []
+        cumulative_dists = []
+        for section in range(0, len(self.game.player_tracking)):
+            for timestamp in range(0, len(self.game.player_tracking[section][team][players[0]].stats['position'])):
+                avg_dist, cumulative_dist = self.GetGroupedness(players, section, timestamp, team)
+                avg_dists.append(avg_dist)
+                cumulative_dists.append(cumulative_dist)
+        return (sum(avg_dists)/len(avg_dists), sum(cumulative_dists)/len(cumulative_dists))
