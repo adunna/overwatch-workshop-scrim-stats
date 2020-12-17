@@ -76,6 +76,8 @@ derived fight stats:
 -- use player closest to reticle
 done- grouped-ness
 - rotation time
+- team fight win rates as a function of ultimate usage, first deaths, first kills
+- ults used per fight
 
 other ideas:
 
