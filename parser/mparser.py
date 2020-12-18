@@ -1,4 +1,4 @@
-from mgame import MatrixGame, MatrixPlayer, MatrixMapInfo
+#from mgame import MatrixGame, MatrixPlayer, MatrixMapInfo
 
 class MatrixParser:
 
