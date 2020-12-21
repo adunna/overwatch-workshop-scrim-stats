@@ -243,23 +243,27 @@ class MatrixAnalyzer:
             feed_deaths[player] = self.GetFeedDeaths(player)
         return feed_deaths
 
-    # Get total damage at given section and timestamp
-    def GetTotalDamage(self, section, timestamp):
+    # Get total damage at given section and timestamp; if team not specified, is over all teams
+    def GetTotalDamage(self, section, timestamp, team=None):
         if timestamp == 0:
             if section == 0:
-                damages = [sum([team[player].stats['hero_damage_dealt'][timestamp] + team[player].stats['barrier_damage_dealt'][timestamp] for player in team]) for team in self.game.player_tracking[section]]
+                damages = [sum([cteam[player].stats['hero_damage_dealt'][timestamp] + cteam[player].stats['barrier_damage_dealt'][timestamp] for player in cteam]) for cteam in self.game.player_tracking[section]]
+                if team is not None:
+                    damages = [damages[team]]
             else:
                 return self.GetTotalDamage(section - 1, -1)
         else:
-            damages = [sum([team[player].stats['hero_damage_dealt'][timestamp] - team[player].stats['hero_damage_dealt'][timestamp - 1] + team[player].stats['barrier_damage_dealt'][timestamp] - team[player].stats['barrier_damage_dealt'][timestamp - 1] for player in team]) for team in self.game.player_tracking[section]]
+            damages = [sum([cteam[player].stats['hero_damage_dealt'][timestamp] - cteam[player].stats['hero_damage_dealt'][timestamp - 1] + cteam[player].stats['barrier_damage_dealt'][timestamp] - cteam[player].stats['barrier_damage_dealt'][timestamp - 1] for player in cteam if timestamp < len(cteam[player].stats['hero_damage_dealt'])]) for cteam in self.game.player_tracking[section]]
+            if team is not None:
+                damages = [damages[team]]
         return sum(damages)
 
-    # Get total damages over all time
-    def GetAllTotalDamages(self):
+    # Get total damages over all time; if team not specified, is over all teams
+    def GetAllTotalDamages(self, team=None):
         damages = []
         for section in range(0, len(self.game.player_tracking)):
             for timestamp in range(0, len(self.game.player_tracking[section][0][list(self.game.player_tracking[section][0].keys())[0]].stats['hero_damage_dealt'])):
-                damages.append(self.GetTotalDamage(section, timestamp))
+                damages.append(self.GetTotalDamage(section, timestamp, team=team))
         return damages
 
     # Get hero damage dealt for given player
