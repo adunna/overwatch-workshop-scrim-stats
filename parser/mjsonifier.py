@@ -10,4 +10,4 @@ class MatrixJSON:
 
     def DumpJSON(self):
         players = self.Analyzer.GetPlayers()
-        return players
+        return {"players": players}
