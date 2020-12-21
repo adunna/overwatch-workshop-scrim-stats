@@ -7,8 +7,8 @@ import pprint
 #pprint.pprint(MJ.DumpJSON())
 
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Hollywood.txt")
-#analyzer = MatrixAnalyzer(game)
+game = parseEngine.readLog("../samples/Numbani.txt")
+analyzer = MatrixAnalyzer(game)
 
 #owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
 

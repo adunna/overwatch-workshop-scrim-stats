@@ -59,7 +59,10 @@ class MatrixParser:
                         game.player_tracking[-1][playerTeam][playerName].stats['healing_received'].append(float(line[17]))
                         game.player_tracking[-1][playerTeam][playerName].stats['ultimate_charge'].append(float(line[18]))
                         game.player_tracking[-1][playerTeam][playerName].stats['player_closest_reticle'].append(line[19])
-                        game.player_tracking[-1][playerTeam][playerName].stats['position'].append((float(line[20][1:]), float(line[21]), float(line[22][:-1])))
+                        try:
+                            game.player_tracking[-1][playerTeam][playerName].stats['position'].append((float(line[20][1:]), float(line[21]), float(line[22][:-1])))
+                        except:
+                            game.player_tracking[-1][playerTeam][playerName].stats['position'].append((0, 0, 0))
 
         return game
 
