@@ -63,8 +63,35 @@ class MatrixParser:
 
         return game
 
-    def write_csv(self, parsed_file, out_filename):
+    def write_csv(self, game, out_filename):
         with open(out_filename, 'w') as o:
-            o.write(','.join(parsed_file[0]) + '\n')
-            for line in parsed_file[1]:
-                o.write(','.join(line) + '\n')
+            o.write('Section,Timestamp,Team,Player,Hero,Hero Damage Dealt,Barrier Damage Dealt,Damage Blocked,Damage Taken,Deaths,Eliminations,Final Blows,Environmental Deaths,Environmental Kills,Healing Dealt,Objective Kills,Solo Kills,Ultimates Earned,Ultimates Used,Healing Received,Ultimate Charge,Player Closest to Reticle,Position\n')
+            for section in range(0, len(game.player_tracking)):
+                for ts in range(0, len(game.player_tracking[section][0][list(game.player_tracking[section][0].keys())[0]].stats['hero_damage_dealt'])):
+                    for team in range(0, len(game.player_tracking[section])):
+                        for player in game.player_tracking[section][team]:
+                            o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+                                section,
+                                ts,
+                                "Team 1" if team == 0 else "Team 2",
+                                player,
+                                game.player_tracking[section][team][player].stats['heroes'][ts],
+                                game.player_tracking[section][team][player].stats['hero_damage_dealt'][ts],
+                                game.player_tracking[section][team][player].stats['barrier_damage_dealt'][ts],
+                                game.player_tracking[section][team][player].stats['damage_blocked'][ts],
+                                game.player_tracking[section][team][player].stats['damage_taken'][ts],
+                                game.player_tracking[section][team][player].stats['deaths'][ts],
+                                game.player_tracking[section][team][player].stats['eliminations'][ts],
+                                game.player_tracking[section][team][player].stats['final_blows'][ts],
+                                game.player_tracking[section][team][player].stats['environmental_deaths'][ts],
+                                game.player_tracking[section][team][player].stats['environmental_kills'][ts],
+                                game.player_tracking[section][team][player].stats['healing_dealt'][ts],
+                                game.player_tracking[section][team][player].stats['objective_kills'][ts],
+                                game.player_tracking[section][team][player].stats['solo_kills'][ts],
+                                game.player_tracking[section][team][player].stats['ultimates_earned'][ts],
+                                game.player_tracking[section][team][player].stats['ultimates_used'][ts],
+                                game.player_tracking[section][team][player].stats['healing_received'][ts],
+                                game.player_tracking[section][team][player].stats['ultimate_charge'][ts],
+                                game.player_tracking[section][team][player].stats['player_closest_reticle'][ts],
+                                str(game.player_tracking[section][team][player].stats['position'][ts])
+                                ))

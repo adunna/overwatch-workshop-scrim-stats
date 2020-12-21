@@ -3,11 +3,11 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-MJ = MatrixJSON("../samples/Hollywood.txt")
-pprint.pprint(MJ.DumpJSON())
+#MJ = MatrixJSON("../samples/Hollywood.txt")
+#pprint.pprint(MJ.DumpJSON())
 
-#parseEngine = MatrixParser()
-#game = parseEngine.readLog("../samples/Hollywood.txt")
+parseEngine = MatrixParser()
+game = parseEngine.readLog("../samples/Hollywood.txt")
 #analyzer = MatrixAnalyzer(game)
 
 #owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
