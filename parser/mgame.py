@@ -1,8 +1,27 @@
 class MatrixGame:
 
     MAP_TYPES = {
+            "Blizzard World": "Hybrid",
+            "Busan": "Control",
+            "Dorado": "Escort",
+            "Eichenwalde": "Hybrid",
             "Hanamura": "Assault",
-            "Hollywood": "Hybrid"
+            "Havana": "Escort",
+            "Hollywood": "Hybrid",
+            "Horizon Lunar Colony": "Assault",
+            "Ilios": "Control",
+            "Junkertown": "Escort",
+            "King's Row": "Hybrid",
+            "Lijiang Tower": "Control",
+            "Nepal": "Control",
+            "Numbani": "Hybrid",
+            "Oasis": "Control",
+            "Paris": "Assault",
+            "Rialto": "Escort",
+            "Route 66": "Escort",
+            "Temple of Anubis": "Assault",
+            "Volskaya Industries": "Assault",
+            "Watchpoint: Gibraltar": "Escort"
     }
 
     def __init__(self):

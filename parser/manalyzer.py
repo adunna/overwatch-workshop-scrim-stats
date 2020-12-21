@@ -1,5 +1,5 @@
 from collections import defaultdict
-#from mgame import MatrixGame
+from mgame import MatrixGame
 
 class MatrixAnalyzer:
 
@@ -58,7 +58,14 @@ class MatrixAnalyzer:
     def GetTimesUltimateUsed(self, player, team=None):
         if team is None:
             team = self.GetTeam(player)
-        pass # TODO 
+        times_ult_used = []
+        for section in self.game.player_tracking:
+            times_ult_used_section = []
+            for i in range(1, len(section[team][player].stats['ultimates_used'])):
+                if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                    times_ult_used_section.append(i)
+            times_ult_used.append(times_ult_used_section)
+        return times_ult_used
 
     # Get time to ultimate (in seconds) for each ultimate for given player
     def GetTimesToUltimate(self, player, team=None):
@@ -144,9 +151,49 @@ class MatrixAnalyzer:
 
     # Get first ult used in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
     def GetFirstUltUsedInFights(self):
+        rand_player = list(self.game.player_tracking[0][0].keys())[0]
         fights = self.GetFights()
+        firstUlts = []
         for section in range(0, len(fights)):
-            pass # TODO
+            curr = 0
+            sectionFirstUlts = []
+            for ts in range(1, len(self.game.player_tracking[section][0][rand_player].stats['hero_damage_dealt'])):
+                if curr >= len(fights[section]):
+                    break
+                if ts > fights[section][curr][1]:
+                    curr += 1
+                if ts >= fights[section][curr][0] and ts <= fights[section][curr][1]:
+                    for team in range(0, 2):
+                        for player in self.game.player_tracking[section][team]:
+                            if self.game.player_tracking[section][team][player].stats['ultimates_used'][ts] != self.game.player_tracking[section][team][player].stats['ultimates_used'][ts-1]:
+                                sectionFirstUlts.append((fights[section][curr][0], fights[section][curr][1], player, self.game.player_tracking[section][team][player].stats['heroes'][ts]))
+                                curr += 1
+                                break
+            firstUlts.append(sectionFirstUlts)
+        return firstUlts
+
+    # Get first death in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
+    def GetFirstDeathInFights(self):
+        rand_player = list(self.game.player_tracking[0][0].keys())[0]
+        fights = self.GetFights()
+        firstDeaths = []
+        for section in range(0, len(fights)):
+            curr = 0
+            sectionFirstDeaths = []
+            for ts in range(1, len(self.game.player_tracking[section][0][rand_player].stats['hero_damage_dealt'])):
+                if curr >= len(fights[section]):
+                    break
+                if ts > fights[section][curr][1]:
+                    curr += 1
+                if ts >= fights[section][curr][0] and ts <= fights[section][curr][1]:
+                    for team in range(0, 2):
+                        for player in self.game.player_tracking[section][team]:
+                            if self.game.player_tracking[section][team][player].stats['deaths'][ts] != self.game.player_tracking[section][team][player].stats['deaths'][ts-1]:
+                                sectionFirstDeaths.append((fights[section][curr][0], fights[section][curr][1], player, self.game.player_tracking[section][team][player].stats['heroes'][ts]))
+                                curr += 1
+                                break
+            firstDeaths.append(sectionFirstDeaths)
+        return firstDeaths
 
     # Get stagger/feed deaths format (num_deaths, [[ts, ...], ...]) for a given player name
     def GetFeedDeaths(self, player, team=None):

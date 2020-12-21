@@ -70,8 +70,8 @@ done- poke damage taken (damage before fight)
 
 derived fight stats:
 
-- first ult
-- first deaths
+done- first ult
+done- first deaths
 - focus fire during fight
 -- use player closest to reticle
 done- grouped-ness
