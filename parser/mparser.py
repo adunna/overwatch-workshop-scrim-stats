@@ -97,5 +97,5 @@ class MatrixParser:
                                     game.player_tracking[section][team][player].stats['healing_received'][ts],
                                     game.player_tracking[section][team][player].stats['ultimate_charge'][ts],
                                     game.player_tracking[section][team][player].stats['player_closest_reticle'][ts],
-                                    str(game.player_tracking[section][team][player].stats['position'][ts])
+                                    "(" + str(game.player_tracking[section][team][player].stats['position'][ts][0]) + "; " + str(game.player_tracking[section][team][player].stats['position'][ts][1]) + "; " + str(game.player_tracking[section][team][player].stats['position'][2]) + ")",
                                 ))
