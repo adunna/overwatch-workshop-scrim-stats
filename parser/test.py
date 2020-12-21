@@ -9,6 +9,7 @@ import pprint
 parseEngine = MatrixParser()
 game = parseEngine.readLog("../samples/Numbani.txt")
 analyzer = MatrixAnalyzer(game)
+parseEngine.write_csv(game, "../samples/TEST.csv")
 
 #owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
 
