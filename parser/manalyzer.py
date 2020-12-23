@@ -27,7 +27,7 @@ class MatrixAnalyzer:
         num_deaths = 0
         for section in range(0, len(self.game.player_tracking)):
             sec_death_times = []
-            for timestamp in range(0, len(self.game.player_tracking[section][team][player].stats['deaths'])):
+            for timestamp in range(0, self.game.section_lengths[section]):
                 if self.game.player_tracking[section][team][player].stats['deaths'][timestamp] > num_deaths:
                     num_deaths += 1
                     sec_death_times.append(timestamp)
@@ -48,10 +48,7 @@ class MatrixAnalyzer:
         if team == None:
             team = self.GetTeam(player)
         statSum = self.GetFinalStat(player, stat, team)
-        if stat == 'all_damage_dealt':
-            statCount = sum([len(section[team][player].stats['hero_damage_dealt']) for section in self.game.player_tracking])
-        else:
-            statCount = sum([len(section[team][player].stats[stat]) for section in self.game.player_tracking])
+        statCount = sum(self.game.section_lengths)
         return (statSum / statCount) * 60
 
     # Get times ultimates used for given player, for each section
@@ -59,9 +56,9 @@ class MatrixAnalyzer:
         if team is None:
             team = self.GetTeam(player)
         times_ult_used = []
-        for section in self.game.player_tracking:
+        for section_num, section in enumerate(self.game.player_tracking):
             times_ult_used_section = []
-            for i in range(1, len(section[team][player].stats['ultimates_used'])):
+            for i in range(1, self.game.section_lengths[section_num]):
                 if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
                     times_ult_used_section.append(i)
             times_ult_used.append(times_ult_used_section)
@@ -73,9 +70,9 @@ class MatrixAnalyzer:
             team = self.GetTeam(player)
         times_to_ult = []
         prev_ults_earned = 0
-        for section in self.game.player_tracking:
+        for section_num, section in enumerate(self.game.player_tracking):
             time_to_ult = 0
-            for i in range(0, len(section[team][player].stats['ultimates_earned'])):
+            for i in range(0, self.game.section_lengths[section_num]):
                 if section[team][player].stats['ultimates_earned'][i] != prev_ults_earned:
                     times_to_ult.append(time_to_ult)
                     time_to_ult = 0
@@ -90,9 +87,9 @@ class MatrixAnalyzer:
         if team == None:
             team = self.GetTeam(player)
         times_ult_held = []
-        for section in self.game.player_tracking:
+        for section_num, section in enumerate(self.game.player_tracking):
             time_ult_held = 0
-            for i in range(0, len(section[team][player].stats['ultimates_earned'])):
+            for i in range(0, self.game.section_lengths[section_num]):
                 if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_used'][i]:
                     time_ult_held += 1
                 else:
@@ -115,14 +112,12 @@ class MatrixAnalyzer:
 
     # Segment game data into fights by sections [[(start, end), ...], ...]
     def GetFights(self):
-        rand_player = list(self.game.player_tracking[0][0].keys())[0]
         fights = []
         for section in range(0, len(self.game.player_tracking)):
             fight_starts = []
             fight_ends = []
             in_fight = 0
-            maxlen = len(self.game.player_tracking[section][0][rand_player].stats['hero_damage_dealt'])
-            for i in range(0, maxlen):
+            for i in range(0, self.game.section_lengths[section]):
                 damage = self.GetTotalDamage(section, i)
                 if damage >= 250 and in_fight == 0:
                     in_fight = 1
@@ -134,30 +129,32 @@ class MatrixAnalyzer:
                 elif damage < 250 and in_fight >= 6:
                     in_fight = 0
                     fight_ends.append(i)
-                if in_fight >= 1 and i == maxlen - 1:
+                if in_fight >= 1 and i == self.game.section_lengths[section] - 1:
                     in_fight = 0
                     fight_ends.append(i)
             fights.append([(fight_starts[x], fight_ends[x]) for x in range(0, len(fight_starts))])
         ret_fights = []
-        for section in fights:
-            filtered_fights = [section[0]]
-            for i in range(1, len(section)):
-                if section[i][0] - 6 <= filtered_fights[-1][1]:
-                    filtered_fights[-1] = (filtered_fights[-1][0], section[i][1])
-                else:
-                    filtered_fights.append(section[i])
+        for section_num, section in enumerate(fights):
+            if len(section) > 0:
+                filtered_fights = [section[0]]
+                for i in range(1, len(section)):
+                    if section[i][0] - 6 <= filtered_fights[-1][1]:
+                        filtered_fights[-1] = (filtered_fights[-1][0], section[i][1])
+                    else:
+                        filtered_fights.append(section[i])
+            else:
+                filtered_fights = [(0, 0), (self.game.section_lengths[section_num], self.game.section_lengths[section_num])]
             ret_fights.append(filtered_fights)
         return ret_fights
 
     # Get first ult used in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
     def GetFirstUltUsedInFights(self):
-        rand_player = list(self.game.player_tracking[0][0].keys())[0]
         fights = self.GetFights()
         firstUlts = []
         for section in range(0, len(fights)):
             curr = 0
             sectionFirstUlts = []
-            for ts in range(1, len(self.game.player_tracking[section][0][rand_player].stats['hero_damage_dealt'])):
+            for ts in range(1, self.game.section_lengths[section]):
                 if curr >= len(fights[section]):
                     break
                 if ts > fights[section][curr][1]:
@@ -174,13 +171,12 @@ class MatrixAnalyzer:
 
     # Get first death in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
     def GetFirstDeathInFights(self):
-        rand_player = list(self.game.player_tracking[0][0].keys())[0]
         fights = self.GetFights()
         firstDeaths = []
         for section in range(0, len(fights)):
             curr = 0
             sectionFirstDeaths = []
-            for ts in range(1, len(self.game.player_tracking[section][0][rand_player].stats['hero_damage_dealt'])):
+            for ts in range(1, self.game.section_lengths[section]):
                 if curr >= len(fights[section]):
                     break
                 if ts > fights[section][curr][1]:
@@ -227,7 +223,7 @@ class MatrixAnalyzer:
         prev_dmg_taken = 0
         for section in range(0, len(fights)):
             fight_ptr = 0
-            for timestamp in range(0, len(self.game.player_tracking[section][team][player].stats['damage_taken'])):
+            for timestamp in range(0, self.game.section_lengths[section]):
                 prev_dmg_taken = self.game.player_tracking[section][team][player].stats['damage_taken'][timestamp] if timestamp == 0 else self.game.player_tracking[section][team][player].stats['damage_taken'][timestamp - 1]
                 if timestamp < fights[section][fight_ptr][0]:
                     poke_dmg += self.game.player_tracking[section][team][player].stats['damage_taken'][timestamp] - prev_dmg_taken
@@ -262,7 +258,7 @@ class MatrixAnalyzer:
     def GetAllTotalDamages(self, team=None):
         damages = []
         for section in range(0, len(self.game.player_tracking)):
-            for timestamp in range(0, len(self.game.player_tracking[section][0][list(self.game.player_tracking[section][0].keys())[0]].stats['hero_damage_dealt'])):
+            for timestamp in range(0, self.game.section_lengths[section]):
                 damages.append(self.GetTotalDamage(section, timestamp, team=team))
         return damages
 
@@ -297,7 +293,7 @@ class MatrixAnalyzer:
         avg_dists = []
         cumulative_dists = []
         for section in range(0, len(self.game.player_tracking)):
-            for timestamp in range(0, len(self.game.player_tracking[section][team][players[0]].stats['position'])):
+            for timestamp in range(0, self.game.section_lengths[section]):
                 avg_dist, cumulative_dist = self.GetGroupedness(players, section, timestamp, team)
                 avg_dists.append(avg_dist)
                 cumulative_dists.append(cumulative_dist)
