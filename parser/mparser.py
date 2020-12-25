@@ -116,9 +116,10 @@ class MatrixParser:
                             if game.player_tracking[-1][playerTeam][playerName].dc_stats['heroes'] == 'D.Va' and game.player_tracking[-1][playerTeam][playerName].dc_stats['max_health'] <= 200 and len([x[0] for x in game.kill_tracking[-1] if x[2] == playerName and runningTS - x[0] > 10]) == 0: # baby dva
                                 game.player_tracking[-1][playerTeam][playerName].dc_stats[stat] -= 600 # adjust for mech damage will take
 
-        for team in game.player_tracking[-1]:
-            for player in team:
-                game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
+        for section_num, section in enumerate(game.player_tracking):
+            for team in section:
+                for player in team:
+                    game.section_lengths[section_num] = min(game.section_lengths[section_num], len(team[player].stats['heroes']))
         
         return game
 
