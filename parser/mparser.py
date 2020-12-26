@@ -2,6 +2,8 @@ from mgame import MatrixGame, MatrixPlayer, MatrixMapInfo
 
 class MatrixParser:
 
+    HERO_REMAPS = {'LÃºcio': 'Lucio', 'Torbjörn': 'Torbjorn', 'Wrecking Ball': 'WreckingBall', 'Soldier: 76': 'Soldier76'}
+
     def __init__(self):
         pass
 
@@ -73,7 +75,10 @@ class MatrixParser:
                             game.player_tracking[-1][playerTeam][playerName].team = playerTeam
                         try:
                             game.player_tracking[-1][playerTeam][playerName].stats['position'].append((float(line[20][1:]), float(line[21]), float(line[22][:-1])))
-                            game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(line[2])
+                            if line[2] in self.HERO_REMAPS:
+                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(self.HERO_REMAPS[line[2]])
+                            else:
+                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(line[2])
                             game.player_tracking[-1][playerTeam][playerName].stats['hero_damage_dealt'].append(float(line[3]))
                             game.player_tracking[-1][playerTeam][playerName].stats['barrier_damage_dealt'].append(float(line[4]))
                             game.player_tracking[-1][playerTeam][playerName].stats['damage_blocked'].append(float(line[5]))
@@ -120,7 +125,7 @@ class MatrixParser:
             for team in section:
                 for player in team:
                     game.section_lengths[section_num] = min(game.section_lengths[section_num], len(team[player].stats['heroes']))
-        
+
         return game
 
     def write_csv(self, game, out_filename):
