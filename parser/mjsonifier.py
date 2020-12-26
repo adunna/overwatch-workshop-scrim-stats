@@ -15,7 +15,7 @@ class MatrixJSON:
         players = self.Analyzer.GetPlayers()
         final_stats = {player: {stat: self.Analyzer.GetFinalStat(player, stat, players[player]) for stat in STAT_TYPES} for player in players}
         stats_per_minute = {player: {stat: self.Analyzer.GetStatPerMinute(player, stat, players[player]) for stat in STAT_TYPES} for player in players}
-        heroes_played = {player: self.GetHeroesPlayed(player) for player in players}
+        heroes_played = {player: self.Analyzer.GetHeroesPlayed(player) for player in players}
         team_damage_over_time = {
                 "team1": self.Analyzer.GetAllTotalDamages(team=0),
                 "team2": self.Analyzer.GetAllTotalDamages(team=1),
