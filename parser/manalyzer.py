@@ -19,6 +19,18 @@ class MatrixAnalyzer:
     def GetTeam(self, player):
         return 0 if player in self.game.player_tracking[0][0] else 1
 
+    # Get heroes played for given player, with time on each
+    def GetHeroesPlayed(self, player, team=None):
+        if team is None:
+            team = self.GetTeam(player)
+        heroes_played = {}
+        for section in range(0, len(self.game.player_tracking)):
+            for timestamp in range(0, self.game.section_lengths[section]):
+                if self.game.player_tracking[section][team][player].stats['heroes'][timestamp] not in heroes_played:
+                    heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] = 0
+                heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] += 1
+        return heroes_played
+
     # Get death timestamps for given player for each section
     def GetDeaths(self, player, team=None):
         if team is None:
