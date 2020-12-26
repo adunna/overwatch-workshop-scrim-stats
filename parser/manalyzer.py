@@ -115,12 +115,16 @@ class MatrixAnalyzer:
     # Get average time to ultimate (in seconds) for given player
     def GetAverageTimeToUltimate(self, player, team=None):
         times_to_ult = self.GetTimesToUltimate(player, team)
-        return sum(times_to_ult) / len(times_to_ult)
+        if len(times_to_ult) > 0:
+            return sum(times_to_ult) / len(times_to_ult)
+        return 0
 
     # Get average time ultimate held (in seconds) for given player
     def GetAverageTimeUltimateHeld(self, player, team=None):
         times_ult_held = self.GetTimesUltimateHeld(player, team)
-        return sum(times_ult_held) / len(times_ult_held)
+        if len(times_ult_held) > 0:
+            return sum(times_ult_held) / len(times_ult_held)
+        return 0
 
     # Segment game data into fights by sections [[(start, end), ...], ...]
     def GetFights(self):
