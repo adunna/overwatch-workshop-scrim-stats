@@ -19,6 +19,24 @@ class MatrixJSON:
         avg_time_to_ult = [{player: self.Analyzer.GetAverageTimeToUltimate(player, team) for player in players[team]} for team in players]
         avg_time_ult_held = [{player: self.Analyzer.GetAverageTimeUltimateHeld(player, team) for player in players[team]} for team in players]
         inferred_roles = [self.Analyzer.GetInferRoles(team) for team in players]
+        players_ordered = []
+        desired_order = ['main_tank', 'off_tank', 'hitscan_dps', 'flex_dps', 'main_support', 'flex_support']
+        desired_order_backup = ['tank', 'tank', 'dps', 'dps', 'support', 'support']
+        for team in players:
+            placed = 0
+            ordering = desired_order
+            if inferred_roles[team][players[team][0]] not in desired_order:
+                ordering = desired_order_backup
+            team_ordered = []
+            while len(players[team]) > placed:
+                for player in players[team]:
+                    if inferred_roles[team][player] == ordering[placed]:
+                        team_ordered.append(player)
+                        placed += 1
+                        if placed == len(players[team]):
+                            break
+            players_ordered.append(team_ordered)
+
         team_damage_over_time = {
                 "team1": self.Analyzer.GetAllTotalDamages(team=0),
                 "team2": self.Analyzer.GetAllTotalDamages(team=1),
@@ -32,4 +50,5 @@ class MatrixJSON:
                 "avg_time_to_ult": avg_time_to_ult,
                 "avg_time_ult_held": avg_time_ult_held,
                 "inferred_roles": inferred_roles,
+                "players_ordered": players_ordered,
                 }

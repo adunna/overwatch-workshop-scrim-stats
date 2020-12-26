@@ -4,7 +4,7 @@ from mjsonifier import MatrixJSON
 import pprint
 
 MJ = MatrixJSON("../samples/Log-2020-12-24-14-14-13.txt")
-pprint.pprint(MJ.DumpJSON()['inferred_roles'])
+pprint.pprint(MJ.DumpJSON()['players_ordered'])
 
 parseEngine = MatrixParser()
 game = parseEngine.readLog("../samples/Log-2020-12-24-14-14-13.txt")
