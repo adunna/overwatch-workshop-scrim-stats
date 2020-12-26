@@ -22,7 +22,6 @@ class MatrixJSON:
         players_ordered = []
         desired_order = ['main_tank', 'off_tank', 'hitscan_dps', 'flex_dps', 'main_support', 'flex_support']
         desired_order_backup = ['tank', 'tank', 'dps', 'dps', 'support', 'support']
-        print(inferred_roles)
         for team in players:
             placed = 0
             prev_placed = placed
