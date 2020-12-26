@@ -22,19 +22,26 @@ class MatrixJSON:
         players_ordered = []
         desired_order = ['main_tank', 'off_tank', 'hitscan_dps', 'flex_dps', 'main_support', 'flex_support']
         desired_order_backup = ['tank', 'tank', 'dps', 'dps', 'support', 'support']
+        print(inferred_roles)
         for team in players:
             placed = 0
+            prev_placed = placed
             ordering = desired_order
             if inferred_roles[team][players[team][0]] not in desired_order:
                 ordering = desired_order_backup
             team_ordered = []
             while len(players[team]) > placed:
+                prev_placed = placed
                 for player in players[team]:
                     if inferred_roles[team][player] == ordering[placed]:
                         team_ordered.append(player)
                         placed += 1
                         if placed == len(players[team]):
                             break
+                if prev_placed == placed: # encountered some error
+                    placed = len(players[team])
+                    team_ordered = players[team]
+                    break
             players_ordered.append(team_ordered)
 
         team_damage_over_time = {
