@@ -7,12 +7,11 @@ import pprint
 #pprint.pprint(MJ.DumpJSON())
 
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2020-12-24-14-14-13.txt")
+game = parseEngine.readLog("../samples/i0yY2MOFe5WreEb4.txt")
 analyzer = MatrixAnalyzer(game)
 #print(analyzer.GetAllTotalDamages())
 #print(analyzer.game.section_lengths)
-print(analyzer.GetHeroesPlayed('LÃºcio'))
-print(analyzer.GetPlayers())
+print({player: analyzer.GetHeroesPlayed(player) for player in analyzer.GetPlayers()})
 #parseEngine.write_csv(game, "../samples/TEST.csv")
 
 #owssparser.write_csv(parsed_data, "../samples/workshop_output1.csv")
