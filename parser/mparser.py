@@ -77,6 +77,10 @@ class MatrixParser:
                             game.player_tracking[-1][playerTeam][playerName].stats['position'].append((float(line[20][1:]), float(line[21]), float(line[22][:-1])))
                             if line[2] in self.HERO_REMAPS:
                                 game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(self.HERO_REMAPS[line[2]])
+                            elif 'Torb' in line[2]:
+                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append('Torbjorn')
+                            elif 'cio' in line[2]:
+                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append('Lucio')
                             else:
                                 game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(line[2])
                             game.player_tracking[-1][playerTeam][playerName].stats['hero_damage_dealt'].append(float(line[3]))
