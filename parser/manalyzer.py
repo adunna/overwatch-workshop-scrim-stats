@@ -3,6 +3,25 @@ from mgame import MatrixGame
 
 class MatrixAnalyzer:
 
+    HEROTYPE_ROLE_MAPS = {
+        'tank': ['main_tank', 'off_tank'],
+        'dps': ['hitscan_dps', 'flex_dps'],
+        'support': ['main_support', 'flex_support']
+    }
+    HEROTYPE_MAPS = {
+        'tank': set(['D.Va', 'Orisa', 'Reinhardt', 'Roadhog', 'Sigma', 'Winston', 'WreckingBall', 'Zarya']),
+        'dps': set(['Ashe', 'Bastion', 'Doomfist', 'Echo', 'Genji', 'Hanzo', 'Junkrat', 'McCree', 'Mei', 'Pharah', 'Reaper', 'Soldier76', 'Sombra', 'Symmetra', 'Torbjorn', 'Tracer', 'Widowmaker']),
+        'support': set(['Ana', 'Baptiste', 'Brigitte', 'Lucio', 'Mercy', 'Moira', 'Zenyatta'])
+    }
+    ROLE_MAPS = {
+        'main_tank': ['Reinhardt', 'Orisa', 'Winston', 'WreckingBall', 'Sigma', 'Roadhog', 'Zarya', 'D.Va'],
+        'hitscan_dps': ['Ashe', 'Widowmaker', 'McCree', 'Soldier76', 'Reaper', 'Tracer', 'Sombra', 'Bastion', 'Hanzo', 'Symmetra', 'Echo', 'Mei', 'Torbjorn', 'Pharah', 'Doomfist', 'Genji', 'Junkrat'],
+        'main_support': ['Lucio', 'Mercy', 'Brigitte', 'Zenyatta', 'Baptiste', 'Moira', 'Ana']
+    }
+    ROLE_MAPS['off_tank'] = ROLE_MAPS['main_tank'][::-1]
+    ROLE_MAPS['flex_dps'] = ROLE_MAPS['hitscan_dps'][::-1]
+    ROLE_MAPS['flex_support'] = ROLE_MAPS['main_support'][::-1]
+
     def __init__(self, game):
         self.game = game
 
@@ -21,7 +40,7 @@ class MatrixAnalyzer:
     def GetTeam(self, player):
         return 0 if player in self.game.player_tracking[0][0] else 1
 
-    # Get heroes played for given player, with time on each
+    # Get heroes played for given player, with time on each, in form {hero: time, ...}
     def GetHeroesPlayed(self, player, team=None):
         if team is None:
             team = self.GetTeam(player)
@@ -32,6 +51,61 @@ class MatrixAnalyzer:
                     heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] = 0
                 heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] += 1
         return heroes_played
+
+    # Infer role groups for team from heroes played, format {player: role, ...}
+    def GetInferRoleGroups(self, team):
+        players = self.GetPlayers()[team]
+        mostplayed = {} # player: hero
+        for player in players:
+            heroes_played = self.GetHeroesPlayed(player, team)
+            mostplayed[player] = list(heroes_played.keys())[0]
+            for hero in heroes_played:
+                if heroes_played[hero] > heroes_played[mostplayed[player]]:
+                    mostplayed[player] = hero
+        player_roles = {}
+        for player in mostplayed:
+            for herotype in self.HEROTYPE_MAPS:
+                if mostplayed[player] in self.HEROTYPE_MAPS[herotype]:
+                    player_roles[player] = herotype
+                    break
+        return player_roles
+
+    # Infer roles for team from heroes played, format {player: role, ...}
+    def GetInferRoles(self, team):
+        try:
+            players = self.GetPlayers()[team]
+            mostplayed = {} # player: hero
+            for player in players:
+                heroes_played = self.GetHeroesPlayed(player, team)
+                mostplayed[player] = list(heroes_played.keys())[0]
+                for hero in heroes_played:
+                    if heroes_played[hero] > heroes_played[mostplayed[player]]:
+                        mostplayed[player] = hero
+            player_types = {x: [] for x in self.HEROTYPE_MAPS} # role: [player, player], ...
+            for player in mostplayed:
+                for herotype in self.HEROTYPE_MAPS:
+                    if mostplayed[player] in self.HEROTYPE_MAPS[herotype]:
+                        player_types[herotype].append(player)
+                        break
+            # now we can infer specific roles
+            player_roles = {} # {player: role, ...}
+            for herotype in player_types: # find main tank, main supp, and hitscan then assign other types
+                firstoccs = [99, 99] # which player has lower number for role
+                searching = self.HEROTYPE_ROLE_MAPS[herotype][0] # role we're searching
+                for i in range(0, len(self.ROLE_MAPS[searching])):
+                    if self.ROLE_MAPS[searching][i] == mostplayed[player_types[herotype][0]]:
+                        firstoccs[0] = i
+                    if self.ROLE_MAPS[searching][i] == mostplayed[player_types[herotype][1]]:
+                        firstoccs[1] = i
+                if firstoccs[0] < firstoccs[1]: # first player is this role
+                    player_roles[player_types[herotype][0]] = searching
+                    player_roles[player_types[herotype][1]] = self.HEROTYPE_ROLE_MAPS[herotype][1]
+                else:
+                    player_roles[player_types[herotype][1]] = searching
+                    player_roles[player_types[herotype][0]] = self.HEROTYPE_ROLE_MAPS[herotype][1]
+            return player_roles
+        except: # not 2/2/2
+            return self.GetInferRoleGroups(team)
 
     # Get death timestamps for given player for each section
     def GetDeaths(self, player, team=None):

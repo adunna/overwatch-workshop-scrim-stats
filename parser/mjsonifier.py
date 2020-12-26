@@ -18,6 +18,7 @@ class MatrixJSON:
         heroes_played = [{player: self.Analyzer.GetHeroesPlayed(player, team) for player in players[team]} for team in players]
         avg_time_to_ult = [{player: self.Analyzer.GetAverageTimeToUltimate(player, team) for player in players[team]} for team in players]
         avg_time_ult_held = [{player: self.Analyzer.GetAverageTimeUltimateHeld(player, team) for player in players[team]} for team in players]
+        inferred_roles = [self.Analyzer.GetInferRoles(team) for team in players]
         team_damage_over_time = {
                 "team1": self.Analyzer.GetAllTotalDamages(team=0),
                 "team2": self.Analyzer.GetAllTotalDamages(team=1),
@@ -30,4 +31,5 @@ class MatrixJSON:
                 "team_damage_over_time": team_damage_over_time,
                 "avg_time_to_ult": avg_time_to_ult,
                 "avg_time_ult_held": avg_time_ult_held,
+                "inferred_roles": inferred_roles,
                 }
