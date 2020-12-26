@@ -13,11 +13,11 @@ class MatrixJSON:
 
     def DumpJSON(self):
         players = self.Analyzer.GetPlayers()
-        final_stats = {player: {stat: self.Analyzer.GetFinalStat(player, stat, players[player]) for stat in STAT_TYPES} for player in players}
-        stats_per_minute = {player: {stat: self.Analyzer.GetStatPerMinute(player, stat, players[player]) for stat in STAT_TYPES} for player in players}
-        heroes_played = {player: self.Analyzer.GetHeroesPlayed(player) for player in players}
-        avg_time_to_ult = {player: self.Analyzer.GetAverageTimeToUltimate(player) for player in players}
-        avg_time_ult_held = {player: self.Analyzer.GetAverageTimeUltimateHeld(player) for player in players}
+        final_stats = [{player: {stat: self.Analyzer.GetFinalStat(player, stat, team) for stat in STAT_TYPES} for player in players[team]} for team in players]
+        stats_per_minute = [{player: {stat: self.Analyzer.GetStatPerMinute(player, stat, team) for stat in STAT_TYPES} for player in players[team]} for team in players]
+        heroes_played = [{player: self.Analyzer.GetHeroesPlayed(player, team) for player in players[team]} for team in players]
+        avg_time_to_ult = [{player: self.Analyzer.GetAverageTimeToUltimate(player, team) for player in players[team]} for team in players]
+        avg_time_ult_held = [{player: self.Analyzer.GetAverageTimeUltimateHeld(player, team) for player in players[team]} for team in players]
         team_damage_over_time = {
                 "team1": self.Analyzer.GetAllTotalDamages(team=0),
                 "team2": self.Analyzer.GetAllTotalDamages(team=1),

@@ -6,14 +6,16 @@ class MatrixAnalyzer:
     def __init__(self, game):
         self.game = game
 
-    # Get names of all players, form of {player: team, ...}
+    # Get names of all players, form of {team: [player, ...]}
     def GetPlayers(self):
-        players = {} # playername: team
+        teams = {}
         for section in self.game.player_tracking:
-            for team in section:
+            for team_num, team in enumerate(section):
                 for player in team:
-                    players[player] = team[player].team
-        return players
+                    if team_num not in teams:
+                        teams[team_num] = set()
+                    teams[team_num].add(player)
+        return {team: list(teams[team]) for team in teams}
 
     # Get team for given player
     def GetTeam(self, player):
@@ -247,12 +249,14 @@ class MatrixAnalyzer:
                     fight_ptr += 1
         return poke_dmg
 
-    # Get stagger/feed deaths for all players
+    # Get stagger/feed deaths for all players, form [{player: num, ...}, ...] for team 0 and 1
     def GetAllFeedDeaths(self):
-        players = list(self.GetPlayers().keys())
-        feed_deaths = {}
-        for player in players:
-            feed_deaths[player] = self.GetFeedDeaths(player)
+        players = self.GetPlayers()
+        feed_deaths = []
+        for team in players:
+            feed_deaths.append({})
+            for player in players[team]:
+                feed_deaths[team][player] = self.GetFeedDeaths(player, team)
         return feed_deaths
 
     # Get total damage at given section and timestamp; if team not specified, is over all teams
