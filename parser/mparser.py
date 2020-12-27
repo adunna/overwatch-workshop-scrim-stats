@@ -136,7 +136,7 @@ class MatrixParser:
         with open(out_filename, 'w') as o:
             o.write('Section,Timestamp,Team,Player,Hero,Hero Damage Dealt,Barrier Damage Dealt,Damage Blocked,Damage Taken,Deaths,Eliminations,Final Blows,Environmental Deaths,Environmental Kills,Healing Dealt,Objective Kills,Solo Kills,Ultimates Earned,Ultimates Used,Healing Received,Ultimate Charge,Player Closest to Reticle,Cooldown 1,Cooldown 2,Position\n')
             for section in range(0, len(game.player_tracking)):
-                for ts in range(0, len(game.player_tracking[section][0][list(game.player_tracking[section][0].keys())[0]].stats['hero_damage_dealt'])):
+                for ts in range(0, game.section_lengths[section]):
                     for team in range(0, len(game.player_tracking[section])):
                         for player in game.player_tracking[section][team]:
                             if ts < len(game.player_tracking[section][team][player].stats['hero_damage_dealt']):
