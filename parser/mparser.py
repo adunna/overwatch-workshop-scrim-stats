@@ -126,7 +126,14 @@ class MatrixParser:
                                 prevRunningTS = runningTS
                         except:
                             for stat in game.player_tracking[-1][playerTeam][playerName].dc_stats:
-                                game.player_tracking[-1][playerTeam][playerName].dc_stats[stat] = game.player_tracking[-1][playerTeam][playerName].stats[stat][-1]
+                                if len(game.player_tracking[-1][playerTeam][playerName].stats[stat]) > 0:
+                                    game.player_tracking[-1][playerTeam][playerName].dc_stats[stat] = game.player_tracking[-1][playerTeam][playerName].stats[stat][-1]
+                                else:
+                                    game.player_tracking[-1][playerTeam][playerName].dc_stats[stat] = 0
+                            if len(game.player_tracking[-1][playerTeam][playerName].stats[stat]) == 0:
+                                game.player_tracking[-1][playerTeam][playerName].dc_stats['position'] = (0, 0, 0)
+                                game.player_tracking[-1][playerTeam][playerName].dc_stats['heroes'] = ''
+                                game.player_tracking[-1][playerTeam][playerName].dc_stats['player_closest_reticle'] = ''
                             if game.player_tracking[-1][playerTeam][playerName].dc_stats['heroes'] == 'D.Va' and game.player_tracking[-1][playerTeam][playerName].dc_stats['max_health'] <= 200 and len([x[0] for x in game.kill_tracking[-1] if x[2] == playerName and runningTS - x[0] > 10]) == 0: # baby dva
                                 game.player_tracking[-1][playerTeam][playerName].dc_stats[stat] -= 600 # adjust for mech damage will take
 
