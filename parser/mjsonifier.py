@@ -13,6 +13,8 @@ class MatrixJSON:
 
     def DumpJSON(self):
         players = self.Analyzer.GetPlayers()
+        if len(players) < 2:
+            return {}
         final_stats = [{player: {stat: self.Analyzer.GetFinalStat(player, stat, team) for stat in STAT_TYPES} for player in players[team]} for team in players]
         stats_per_minute = [{player: {stat: self.Analyzer.GetStatPerMinute(player, stat, team) for stat in STAT_TYPES} for player in players[team]} for team in players]
         heroes_played = [{player: self.Analyzer.GetHeroesPlayed(player, team) for player in players[team]} for team in players]
