@@ -31,6 +31,7 @@ class MatrixGame:
         self.kill_tracking = [] # [[(timestamp, killer, victim), ...], ...]
         self.player_tracking = [] # [[team1, team2], ...]
         self.section_lengths = []  # [N, ...] one number for each section
+        self.team_names = [] # [team 1, team 2]
         # team format = {playerName: player, ...}
 
 class MatrixMapInfo:

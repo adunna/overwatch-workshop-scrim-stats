@@ -10,7 +10,12 @@ class MatrixParser:
     def readLog(self, filename):
         game = MatrixGame()
         with open(filename, 'r') as f:
-            game.map = next(f).strip().split("]")[1][1:]
+            firstline = next(f).strip().split("]")[1][1:].split(",")
+            game.map = firstline[0]
+            if len(firstline) == 3:
+                game.team_names = [firstline[1], firstline[2]]
+            else:
+                game.team_names = ["Team 1", "Team 2"]
             game.map_type = MatrixGame.MAP_TYPES[game.map]
             game.player_tracking.append([{}, {}])
             game.kill_tracking.append([])
@@ -67,7 +72,7 @@ class MatrixParser:
                                 playerTeam = line[21]
                         else:
                             playerTeam = "Team 1"
-                        playerTeam = 0 if playerTeam == "Team 1" else 1
+                        playerTeam = 0 if playerTeam == game.team_names[0] else 1
                         playerName = line[1]
                         if playerName not in game.player_tracking[-1][playerTeam]:
                             game.player_tracking[-1][playerTeam][playerName] = MatrixPlayer()
@@ -143,7 +148,7 @@ class MatrixParser:
                                 o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
                                     section,
                                     ts,
-                                    "Team 1" if team == 0 else "Team 2",
+                                    game.team_names[0] if team == 0 else game.team_names[1],
                                     player,
                                     game.player_tracking[section][team][player].stats['heroes'][ts],
                                     game.player_tracking[section][team][player].stats['hero_damage_dealt'][ts],

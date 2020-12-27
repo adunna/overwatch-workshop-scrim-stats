@@ -3,12 +3,12 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-MJ = MatrixJSON("../samples/Log-2020-12-24-14-14-13.txt")
-MJ.DumpJSON()
+#MJ = MatrixJSON("../samples/Log-2020-12-24-14-14-13.txt")
+#MJ.DumpJSON()
 #pprint.pprint(MJ.DumpJSON()['players_ordered'])
 
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2020-12-24-14-14-13.txt")
+game = parseEngine.readLog("../samples/Log-2020-12-26-20-29-44.txt")
 analyzer = MatrixAnalyzer(game)
 #print(analyzer.GetAllTotalDamages())
 #print(analyzer.game.section_lengths)
