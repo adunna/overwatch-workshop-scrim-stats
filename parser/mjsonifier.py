@@ -51,10 +51,10 @@ class MatrixJSON:
         # match events info
         # format each player into one group, for each team
         # can do separately for each section
-        # TODO: patch to support multiple instances of same player name
         match_events = {'kills': [], 'sections': [0]}
         match_event_id = 1
         last_time_end = 0
+        match_events['groups'] = [{'id': player, 'content': player} for player in players[0] + players[1]] # TODO: patch to support multiple instances of same player name
         for section in self.Analyzer.game.kill_tracking:
             for kill in section:
                 match_events['kills'].append({'id': match_event_id, 'start': last_time_end + kill[0], 'type': 'point', 'group': kill[1], 'content': "Killed " + kill[2]})
