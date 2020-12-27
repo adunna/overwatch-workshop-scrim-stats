@@ -54,7 +54,10 @@ class MatrixJSON:
         match_events = {'kills': [], 'sections': [0]}
         match_event_id = 1
         last_time_end = 0
-        match_events['groups'] = [{'id': player, 'content': player} for player in set(players[0] + players[1])] # TODO: patch to support multiple instances of same player name
+        all_players = []
+        for team in list(players.keys()):
+            all_players += players[team]
+        match_events['groups'] = [{'id': player, 'content': player} for player in set(all_players)] # TODO: patch to support multiple instances of same player name
         for section in self.Analyzer.game.kill_tracking:
             for kill in section:
                 match_events['kills'].append({'id': match_event_id, 'start': last_time_end + kill[0], 'className': 'event-elimination', 'type': 'point', 'group': kill[1], 'content': '', 'title': "Killed " + kill[2]})
