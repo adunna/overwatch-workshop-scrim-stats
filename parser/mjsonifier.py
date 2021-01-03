@@ -108,7 +108,7 @@ class MatrixJSON:
                         # (ult_earned_ts, ult_used_ts)
                         match_events['ultimates'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': (ultinfo[0] + match_events['sections'][section_num])*1000, 'className': 'event-ultearned'})
                         match_event_id += 1
-                        if ultinfo != -1:
+                        if ultinfo[1] != -1:
                             match_events['ultimates'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': (ultinfo[1] + match_events['sections'][section_num])*1000, 'className': 'event-ultused'})
                             match_event_id += 1
                             match_events['ultimates'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': (ultinfo[0] + match_events['sections'][section_num])*1000, 'end': (ultinfo[1] + match_events['sections'][section_num])*1000, 'className': 'event-ultheld'})
