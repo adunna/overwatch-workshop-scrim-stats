@@ -60,13 +60,13 @@ class MatrixJSON:
         for team in list(players.keys()):
             all_players += players[team]
         match_events['groups'] = [{'id': player, 'content': player, 'className': 'team-' + str(team_number) + '-row'} for team_number, team in enumerate(players_ordered) for player in team] # TODO: patch to support multiple instances of same player name
-        for section in self.game.kill_tracking:
+        for section_num, section in enumerate(self.game.kill_tracking):
             for kill in section:
-                match_events['kills'].append({'id': match_event_id, 'start': last_time_end + kill[0], 'className': 'event-elimination', 'type': 'point', 'group': kill[1], 'content': '', 'title': "Killed " + kill[2]})
+                match_events['kills'].append({'id': match_event_id, 'start': (last_time_end + kill[0])*1000, 'className': 'event-elimination', 'type': 'point', 'group': kill[1], 'content': '', 'title': "Killed " + kill[2]})
                 match_event_id += 1
-                match_events['kills'].append({'id': match_event_id, 'start': last_time_end + kill[0], 'className': 'event-death', 'type': 'point', 'group': kill[2], 'content': '', 'title': "Died to " + kill[1]})
+                match_events['kills'].append({'id': match_event_id, 'start': (last_time_end + kill[0])*1000, 'className': 'event-death', 'type': 'point', 'group': kill[2], 'content': '', 'title': "Died to " + kill[1]})
                 match_event_id += 1
-            last_time_end = match_events['kills'][-1]['start']
+            last_time_end = self.game.section_lengths[section_num]
             match_events['sections'].append(last_time_end)
         fights = self.Analyzer.GetFights()
         for section_num, section in enumerate(fights):
@@ -84,7 +84,7 @@ class MatrixJSON:
                             fightclass = 'fight-win-bg'
                         elif fight_winner != -1:
                             fightclass = 'fight-loss-bg'
-                        match_events['fights'].append({'id': match_event_id, 'start': fight[0] + match_events['sections'][section_num], 'end': fight[1] + match_events['sections'][section_num], 'type': 'background', 'className': fightclass, 'group': player})
+                        match_events['fights'].append({'id': match_event_id, 'start': (fight[0] + match_events['sections'][section_num])*1000, 'end': (fight[1] + match_events['sections'][section_num])*1000, 'type': 'background', 'className': fightclass, 'group': player})
                         match_event_id += 1
         for team_num, team in enumerate(players_ordered):
             for player in team:
@@ -92,13 +92,13 @@ class MatrixJSON:
                 for section_num in range(0, len(self.game.player_tracking)):
                     for timestamp in range(1, self.game.section_lengths[section_num]):
                         if self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] != prev_hero:
-                            match_events['heroes'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': timestamp + match_events['sections'][section_num], 'className': 'event-heroswap', 'style': 'background: url(/static/assets/img/hero_icons/Icon-' + self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] + '.png);'})
+                            match_events['heroes'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': (timestamp + match_events['sections'][section_num])*1000, 'className': 'event-heroswap', 'style': 'background: url(/static/assets/img/hero_icons/Icon-' + self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] + '.png);'})
                             match_event_id += 1
                         prev_hero = self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp]
         for section in match_events['sections'][1:-1]:
             for team in players_ordered:
                 for player in team:
-                    match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section, 'end': section+1, 'className': 'section-bg'})
+                    match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section*1000, 'end': (section+1)*1000, 'className': 'section-bg'})
                     match_event_id += 1
 
         return {
