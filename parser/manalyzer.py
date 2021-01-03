@@ -47,9 +47,10 @@ class MatrixAnalyzer:
         heroes_played = {}
         for section in range(0, len(self.game.player_tracking)):
             for timestamp in range(0, self.game.section_lengths[section]):
-                if self.game.player_tracking[section][team][player].stats['heroes'][timestamp] not in heroes_played:
-                    heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] = 0
-                heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] += 1
+                if player in self.game.player_tracking[section][team]:
+                    if self.game.player_tracking[section][team][player].stats['heroes'][timestamp] not in heroes_played:
+                        heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] = 0
+                    heroes_played[self.game.player_tracking[section][team][player].stats['heroes'][timestamp]] += 1
         return heroes_played
 
     # Infer role groups for team from heroes played, format {player: role, ...}
