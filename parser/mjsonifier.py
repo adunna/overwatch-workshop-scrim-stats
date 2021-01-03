@@ -92,7 +92,7 @@ class MatrixJSON:
                 for section_num in range(0, len(self.game.player_tracking)):
                     for timestamp in range(1, self.game.section_lengths[section_num]):
                         if self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] != prev_hero:
-                            match_events['heroes'].append({'id': match_event_id, 'type': 'point', 'start': timestamp + match_events['sections'][section_num], 'className': 'event-heroswap', 'style': 'background: url(/static/assets/img/hero_icons/Icon-' + self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] + '.png);'})
+                            match_events['heroes'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': timestamp + match_events['sections'][section_num], 'className': 'event-heroswap', 'style': 'background: url(/static/assets/img/hero_icons/Icon-' + self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] + '.png);'})
                             match_event_id += 1
                         prev_hero = self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp]
 
