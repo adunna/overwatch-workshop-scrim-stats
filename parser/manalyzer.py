@@ -239,9 +239,91 @@ class MatrixAnalyzer:
             ret_fights.append(filtered_fights)
         return ret_fights
 
+    # Get first ult used between given timestamps (inclusive), in format (player, hero)
+    def GetFirstUltUsed(self, section, start, end):
+        for ts in range(start, end + 1):
+            for team in range(0, 2):
+                for player in self.game.player_tracking[section][team]:
+                    if self.game.player_tracking[section][team][player].stats['ultimates_used'][ts] != self.game.player_tracking[section][team][player].stats['ultimates_used'][ts-1]:
+                        return (player, self.game.player_tracking[section][team][player].stats['heroes'][ts])
+        return ('', '')
+
+    # Get first death between given timestamps (inclusive), in format (player, hero)
+    def GetFirstDeath(self, section, start, end):
+        for ts in range(start, end + 1):
+            for team in range(0, 2):
+                for player in self.game.player_tracking[section][team]:
+                    if self.game.player_tracking[section][team][player].stats['deaths'][ts] != self.game.player_tracking[section][team][player].stats['deaths'][ts-1]:
+                        return (player, self.game.player_tracking[section][team][player].stats['heroes'][ts])
+        return ('', '')
+
+    # Get first final blow between given timestamps (inclusive), in format (player, hero)
+    def GetFirstFinalBlow(self, section, start, end):
+        for ts in range(start, end + 1):
+            for team in range(0, 2):
+                for player in self.game.player_tracking[section][team]:
+                    if self.game.player_tracking[section][team][player].stats['final_blows'][ts] != self.game.player_tracking[section][team][player].stats['final_blows'][ts-1]:
+                        return (player, self.game.player_tracking[section][team][player].stats['heroes'][ts])
+        return ('', '')
+
+    # Get ults used between given timestamps (inclusive) for each team, in format ([player, player, ...], [player, player, ...], [hero, hero, ...], [hero, hero, ...])
+    def GetTeamUltsUsed(self, section, start, end):
+        team1count = []
+        team2count = []
+        team1ults = []
+        team2ults = []
+        for ts in range(start, end + 1):
+            for team in range(0, 2):
+                for player in self.game.player_tracking[section][team]:
+                    if self.game.player_tracking[section][team][player].stats['ultimates_used'][ts] != self.game.player_tracking[section][team][player].stats['ultimates_used'][ts-1]:
+                        if team == 0:
+                            team1count.append(player)
+                            team1ults.append(self.game.player_tracking[section][team][player].stats['heroes'][ts])
+                        else:
+                            team2count.append(player)
+                            team2ults.append(self.game.player_tracking[section][team][player].stats['heroes'][ts])
+        return (team1count, team2count, team1ults, team2ults)
+
+    # Get deaths between given timestamps (inclusive) for each team, in format ([player, player, ...], [player, player, ...], [hero, hero, ...], [hero, hero, ...])
+    def GetTeamDeaths(self, section, start, end):
+        team1count = []
+        team2count = []
+        team1deaths = []
+        team2deaths = []
+        for ts in range(start, end + 1):
+            for team in range(0, 2):
+                for player in self.game.player_tracking[section][team]:
+                    if self.game.player_tracking[section][team][player].stats['deaths'][ts] != self.game.player_tracking[section][team][player].stats['deaths'][ts-1]:
+                        if team == 0:
+                            team1count.append(player)
+                            team1deaths.append(self.game.player_tracking[section][team][player].stats['heroes'][ts])
+                        else:
+                            team2count.append(player)
+                            team2deaths.append(self.game.player_tracking[section][team][player].stats['heroes'][ts])
+        return (team1count, team2count, team1deaths, team2deaths)
+
+    # Get final blows between given timestamps (inclusive) for each team, in format ([player, player, ...], [player, player, ...], [hero, hero, ...], [hero, hero, ...])
+    def GetTeamFinalBlows(self, section, start, end):
+        team1count = []
+        team2count = []
+        team1fbs = []
+        team2fbs = []
+        for ts in range(start, end + 1):
+            for team in range(0, 2):
+                for player in self.game.player_tracking[section][team]:
+                    for c in range(0, self.game.player_tracking[section][team][player].stats['final_blows'][ts] - self.game.player_tracking[section][team][player].stats['final_blows'][ts-1]):
+                        if team == 0:
+                            team1count.append(player)
+                            team1fbs.append(self.game.player_tracking[section][team][player].stats['heroes'][ts])
+                        else:
+                            team2count.append(player)
+                            team2fbs.append(self.game.player_tracking[section][team][player].stats['heroes'][ts])
+        return (team1count, team2count, team1fbs, team2fbs)
+
     # Get first ult used in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
-    def GetFirstUltUsedInFights(self):
-        fights = self.GetFights()
+    def GetFirstUltUsedInFights(self, fights=None):
+        if fights is None:
+            fights = self.GetFights()
         firstUlts = []
         for section in range(0, len(fights)):
             curr = 0
@@ -262,8 +344,9 @@ class MatrixAnalyzer:
         return firstUlts
 
     # Get first death in each fight, if any, in format [[(fight start, fight end, player, hero), ...], ...]
-    def GetFirstDeathInFights(self):
-        fights = self.GetFights()
+    def GetFirstDeathInFights(self, fights=None):
+        if fights is None:
+            fights = self.GetFights()
         firstDeaths = []
         for section in range(0, len(fights)):
             curr = 0
@@ -392,3 +475,24 @@ class MatrixAnalyzer:
                 avg_dists.append(avg_dist)
                 cumulative_dists.append(cumulative_dist)
         return (sum(avg_dists)/len(avg_dists), sum(cumulative_dists)/len(cumulative_dists))
+
+    # Write auxillary CSVs
+    def WriteAuxillaryCSVs(self, out_base_filename):
+        # get data
+        fights = self.GetFights()
+        with open(out_base_filename + '_fights.csv', 'w') as o:
+            o.write(
+                'Section,Start Timestamp,End Timestamp,First Final Blow,First Death,First Ultimate Used,Team 1 Number Final Blows,Team 1 Number Deaths,Team 1 Number Ultimates Used,Team 2 Number Final Blows,Team 2 Number Deaths,Team 2 Number Ultimates Used,Team 1 FBs,Team 1 Deaths,Team 1 Ultimates Used,Team 2 FBs,Team 2 Deaths,Team 2 Ultimates Used\n'
+            )
+            for section_num, section in enumerate(fights):
+                for fight in section:
+                    first_fb = self.GetFirstFinalBlow(section_num, fight[0], fight[1])
+                    first_death = self.GetFirstDeath(section_num, fight[0], fight[1])
+                    first_ult_used = self.GetFirstUltUsed(section_num, fight[0], fight[1])
+                    fbs = self.GetTeamFinalBlows(section_num, fight[0], fight[1])
+                    deaths = self.GetTeamDeaths(section_num, fight[0], fight[1])
+                    ults_used = self.GetTeamUltsUsed(section_num, fight[0], fight[1])
+                    first_fb_text = first_fb[0] + '|' + first_fb[1] if first_fb[0] != '' else ''
+                    first_death_text = first_death[0] + '|' + first_death[1] if first_death[0] != '' else ''
+                    first_ult_used_text = first_ult_used[0] + '|' + first_ult_used[1] if first_ult_used[0] != '' else ''
+                    o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (section_num, fight[0], fight[1], first_fb_text, first_death_text, first_ult_used_text, len(fbs[0]), len(deaths[0]), len(ults_used[0]), len(fbs[1]), len(deaths[1]), len(ults_used[1]), '|'.join(fbs[2]), '|'.join(deaths[2]), '|'.join(ults_used[2]), '|'.join(fbs[3]), '|'.join(deaths[3]), '|'.join(ults_used[3])))

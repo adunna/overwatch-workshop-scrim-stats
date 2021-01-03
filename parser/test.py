@@ -8,8 +8,9 @@ import pprint
 #pprint.pprint(MJ.DumpJSON()['players_ordered'])
 
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2020-12-26-20-29-44.txt")
+game = parseEngine.readLog("../samples/Log-2020-12-29-21-37-44.txt")
 analyzer = MatrixAnalyzer(game)
+analyzer.WriteAuxillaryCSVs("../samples/out/f3asdf2sz")
 #print(analyzer.GetAllTotalDamages())
 #print(analyzer.game.section_lengths)
 #print({player: analyzer.GetHeroesPlayed(player) for player in analyzer.GetPlayers()})
