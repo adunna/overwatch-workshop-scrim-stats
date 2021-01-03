@@ -98,7 +98,7 @@ class MatrixJSON:
         for section in match_events['sections'][1:-1]:
             for team in players_ordered:
                 for player in team:
-                    match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section, 'end': section, 'className': 'section-bg'})
+                    match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section, 'end': section+1, 'className': 'section-bg'})
                     match_event_id += 1
 
         return {
