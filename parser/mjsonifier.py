@@ -66,7 +66,7 @@ class MatrixJSON:
                 match_event_id += 1
                 match_events['kills'].append({'id': match_event_id, 'start': (last_time_end + kill[0])*1000, 'className': 'event-death', 'type': 'point', 'group': kill[2], 'content': '', 'title': "Died to " + kill[1]})
                 match_event_id += 1
-            last_time_end = self.game.section_lengths[section_num]
+            last_time_end += self.game.section_lengths[section_num]
             match_events['sections'].append(last_time_end)
         fights = self.Analyzer.GetFights()
         for section_num, section in enumerate(fights):
