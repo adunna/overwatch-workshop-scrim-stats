@@ -3,14 +3,14 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-#MJ = MatrixJSON("../samples/Log-2020-12-24-14-14-13.txt")
-#MJ.DumpJSON()
-#pprint.pprint(MJ.DumpJSON()['players_ordered'])
+MJ = MatrixJSON("../samples/Log-2020-12-24-14-14-13.txt")
+MJ.DumpJSON()
+pprint.pprint(MJ.DumpJSON()['match_events']['groups'])
 
 parseEngine = MatrixParser()
 game = parseEngine.readLog("../samples/Log-2020-12-29-21-37-44.txt")
 analyzer = MatrixAnalyzer(game)
-analyzer.WriteAuxillaryCSVs("../samples/out/f3asdf2sz")
+#analyzer.WriteAuxillaryCSVs("../samples/out/f3asdf2sz")
 #print(analyzer.GetAllTotalDamages())
 #print(analyzer.game.section_lengths)
 #print({player: analyzer.GetHeroesPlayed(player) for player in analyzer.GetPlayers()})
