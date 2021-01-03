@@ -53,14 +53,14 @@ class MatrixJSON:
         # match events info
         # format each player into one group, for each team
         # can do separately for each section
-        match_events = {'kills': [], 'sections': [0], 'fights': []}
+        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': []}
         match_event_id = 1
         last_time_end = 0
         all_players = []
         for team in list(players.keys()):
             all_players += players[team]
         match_events['groups'] = [{'id': player, 'content': player, 'className': 'team-' + str(team_number) + '-row'} for team_number, team in enumerate(players_ordered) for player in team] # TODO: patch to support multiple instances of same player name
-        for section in self.Analyzer.game.kill_tracking:
+        for section in self.game.kill_tracking:
             for kill in section:
                 match_events['kills'].append({'id': match_event_id, 'start': last_time_end + kill[0], 'className': 'event-elimination', 'type': 'point', 'group': kill[1], 'content': '', 'title': "Killed " + kill[2]})
                 match_event_id += 1
@@ -86,6 +86,15 @@ class MatrixJSON:
                             fightclass = 'fight-loss-bg'
                         match_events['fights'].append({'id': match_event_id, 'start': fight[0] + match_events['sections'][section_num], 'end': fight[1] + match_events['sections'][section_num], 'type': 'background', 'className': fightclass, 'group': player})
                         match_event_id += 1
+        for team_num, team in enumerate(players_ordered):
+            for player in team:
+                prev_hero = None
+                for section_num in range(0, len(self.game.player_tracking)):
+                    for timestamp in range(1, self.game.section_lengths[section_num]):
+                        if self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] != prev_hero:
+                            match_events['heroes'].append({'id': match_event_id, 'type': 'point', 'start': timestamp + match_events['sections'][section_num], 'className': 'event-heroswap', 'style': 'background: url(/static/assets/img/hero_icons/Icon-' + self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] + '.png);'})
+                            match_event_id += 1
+                        prev_hero = self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp]
 
         return {
                 "players": players,
