@@ -53,7 +53,7 @@ class MatrixJSON:
         # match events info
         # format each player into one group, for each team
         # can do separately for each section
-        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': []}
+        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': [], 'sections_viz': []}
         match_event_id = 1
         last_time_end = 0
         all_players = []
@@ -95,6 +95,11 @@ class MatrixJSON:
                             match_events['heroes'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': timestamp + match_events['sections'][section_num], 'className': 'event-heroswap', 'style': 'background: url(/static/assets/img/hero_icons/Icon-' + self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp] + '.png);'})
                             match_event_id += 1
                         prev_hero = self.game.player_tracking[section_num][team_num][player].stats['heroes'][timestamp]
+        for section in match_events['sections'][1:-1]:
+            for team in players_ordered:
+                for player in team:
+                    match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section, 'end': section, 'className': 'section-bg'})
+                    match_event_id += 1
 
         return {
                 "players": players,
