@@ -206,6 +206,23 @@ class MatrixAnalyzer:
             return sum(times_ult_held) / len(times_ult_held)
         return 0
 
+    # Get ultimates available at given timestamp for each team, in format ([player, player, ...], [player, player, ...], [hero, hero, ...], [hero, hero, ...])
+    def GetUltimatesAvailable(self, section, timestamp):
+        team1players = []
+        team2players = []
+        team1heroes = []
+        team2heroes = []
+        for team in range(0, 2):
+            for player in self.game.player_tracking[section][team]:
+                if self.game.player_tracking[section][team][player].stats['ultimate_charge'][timestamp] >= 90:
+                    if team == 0:
+                        team1players.append(player)
+                        team1heroes.append(self.game.player_tracking[section][team][player].stats['heroes'][timestamp])
+                    else:
+                        team2players.append(player)
+                        team2heroes.append(self.game.player_tracking[section][team][player].stats['heroes'][timestamp])
+        return (team1players, team2players, team1heroes, team2heroes)
+
     # Segment game data into fights by sections [[(start, end), ...], ...]
     def GetFights(self):
         fights = []
@@ -486,7 +503,7 @@ class MatrixAnalyzer:
         fights = self.GetFights()
         with open(out_base_filename + '_fights.csv', 'w') as o:
             o.write(
-                'Section,Start Timestamp,End Timestamp,First Final Blow,First Death,First Ultimate Used,Team 1 Number Final Blows,Team 1 Number Deaths,Team 1 Number Ultimates Used,Team 2 Number Final Blows,Team 2 Number Deaths,Team 2 Number Ultimates Used,Team 1 FBs,Team 1 Deaths,Team 1 Ultimates Used,Team 2 FBs,Team 2 Deaths,Team 2 Ultimates Used\n'
+                'Section,Start Timestamp,End Timestamp,First Final Blow,First Death,First Ultimate Used,Team 1 Ultimates Available,Team 2 Ultimates Available,Team 1 Number Final Blows,Team 1 Number Deaths,Team 1 Number Ultimates Used,Team 2 Number Final Blows,Team 2 Number Deaths,Team 2 Number Ultimates Used,Team 1 FBs,Team 1 Deaths,Team 1 Ultimates Used,Team 2 FBs,Team 2 Deaths,Team 2 Ultimates Used\n'
             )
             for section_num, section in enumerate(fights):
                 for fight in section:
@@ -499,4 +516,5 @@ class MatrixAnalyzer:
                     first_fb_text = first_fb[0] + '|' + first_fb[1] if first_fb[0] != '' else ''
                     first_death_text = first_death[0] + '|' + first_death[1] if first_death[0] != '' else ''
                     first_ult_used_text = first_ult_used[0] + '|' + first_ult_used[1] if first_ult_used[0] != '' else ''
-                    o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (section_num, fight[0], fight[1], first_fb_text, first_death_text, first_ult_used_text, len(fbs[0]), len(deaths[0]), len(ults_used[0]), len(fbs[1]), len(deaths[1]), len(ults_used[1]), '|'.join(fbs[2]), '|'.join(deaths[2]), '|'.join(ults_used[2]), '|'.join(fbs[3]), '|'.join(deaths[3]), '|'.join(ults_used[3])))
+                    available_ults = self.GetUltimatesAvailable(section_num, fight[0])
+                    o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (section_num, fight[0], fight[1], first_fb_text, first_death_text, first_ult_used_text, '|'.join(available_ults[2]), '|'.join(available_ults[3]), len(fbs[0]), len(deaths[0]), len(ults_used[0]), len(fbs[1]), len(deaths[1]), len(ults_used[1]), '|'.join(fbs[2]), '|'.join(deaths[2]), '|'.join(ults_used[2]), '|'.join(fbs[3]), '|'.join(deaths[3]), '|'.join(ults_used[3])))
