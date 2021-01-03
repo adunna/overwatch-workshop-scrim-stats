@@ -53,7 +53,7 @@ class MatrixJSON:
         # match events info
         # format each player into one group, for each team
         # can do separately for each section
-        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': [], 'sections_viz': []}
+        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': [], 'sections_viz': [], 'ultimates': []}
         match_event_id = 1
         last_time_end = 0
         all_players = []
@@ -100,6 +100,19 @@ class MatrixJSON:
                 for player in team:
                     match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section*1000, 'end': (section+1)*1000, 'className': 'section-bg'})
                     match_event_id += 1
+        for team_num, team in enumerate(players_ordered):
+            for player in team:
+                ult_timings = self.Analyzer.GetUltTiming(player, team_num)
+                for section_num, section in enumerate(ult_timings):
+                    for ultinfo in section:
+                        # (ult_earned_ts, ult_used_ts)
+                        match_events['ultimates'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': (ultinfo[0] + match_events['sections'][section_num])*1000, 'className': 'event-ultearned'})
+                        match_event_id += 1
+                        if ultinfo != -1:
+                            match_events['ultimates'].append({'id': match_event_id, 'group': player, 'type': 'point', 'start': (ultinfo[1] + match_events['sections'][section_num])*1000, 'className': 'event-ultused'})
+                            match_event_id += 1
+                            match_events['ultimates'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': (ultinfo[0] + match_events['sections'][section_num])*1000, 'end': (ultinfo[1] + match_events['sections'][section_num])*1000, 'className': 'event-ultheld'})
+                            match_event_id += 1
 
         return {
                 "players": players,

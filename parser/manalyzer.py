@@ -143,6 +143,25 @@ class MatrixAnalyzer:
         statCount = sum(self.game.section_lengths)
         return (statSum / statCount) * 60
 
+    # Get time ultimate available at, and time ultimate used, for given player for each section
+    def GetUltTiming(self, player, team=None):
+        if team is None:
+            team = self.GetTeam(player)
+        ult_times = [] # [[(tsgotten, tsused), ...], ...] if tsused is -1 then ult wasn't used
+        for section_num, section in enumerate(self.game.player_tracking):
+            ult_times_sec = []
+            ult_earned_ts = -1
+            for i in range(1, self.game.section_lengths[section_num]):
+                if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                    ult_earned_ts = i
+                if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                    ult_times_sec.append((ult_earned_ts, i))
+                    ult_earned_ts = -1
+            if ult_earned_ts != -1:
+                ult_times_sec.append((ult_earned_ts, -1))
+            ult_times.append(ult_times_sec)
+        return ult_times
+
     # Get times ultimates used for given player, for each section
     def GetTimesUltimateUsed(self, player, team=None):
         if team is None:
