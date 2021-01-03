@@ -5,7 +5,7 @@ import pprint
 
 MJ = MatrixJSON("../samples/Log-2020-12-24-14-14-13.txt")
 MJ.DumpJSON()
-pprint.pprint(MJ.DumpJSON()['match_events']['groups'])
+pprint.pprint(MJ.DumpJSON()['match_events']['fights'])
 
 parseEngine = MatrixParser()
 game = parseEngine.readLog("../samples/Log-2020-12-29-21-37-44.txt")

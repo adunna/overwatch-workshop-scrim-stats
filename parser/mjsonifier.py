@@ -53,7 +53,7 @@ class MatrixJSON:
         # match events info
         # format each player into one group, for each team
         # can do separately for each section
-        match_events = {'kills': [], 'sections': [0]}
+        match_events = {'kills': [], 'sections': [0], 'fights': []}
         match_event_id = 1
         last_time_end = 0
         all_players = []
@@ -68,6 +68,24 @@ class MatrixJSON:
                 match_event_id += 1
             last_time_end = match_events['kills'][-1]['start']
             match_events['sections'].append(last_time_end)
+        fights = self.Analyzer.GetFights()
+        for section_num, section in enumerate(fights):
+            for fight in section:
+                fbs = self.Analyzer.GetTeamFinalBlows(section_num, fight[0], fight[1])
+                fight_winner = -1
+                if len(fbs[0]) > len(fbs[1]):
+                    fight_winner = 0
+                elif len(fbs[1]) > len(fbs[0]):
+                    fight_winner = 1
+                for team_num, team in enumerate(players_ordered):
+                    for player in team:
+                        fightclass = 'fight-tie-bg'
+                        if team_num == fight_winner:
+                            fightclass = 'fight-win-bg'
+                        elif fight_winner != -1:
+                            fightclass = 'fight-loss-bg'
+                        match_events['fights'].append({'id': match_event_id, 'start': fight[0] + match_events['sections'][section_num], 'end': fight[1] + match_events['sections'][section_num], 'type': 'background', 'className': fightclass, 'group': player})
+                        match_event_id += 1
 
         return {
                 "players": players,
