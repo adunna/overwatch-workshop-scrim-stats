@@ -124,12 +124,15 @@ class MatrixAnalyzer:
 
     # Get final stat for given player
     def GetFinalStat(self, player, stat, team=None):
-        if team == None:
-            team = self.GetTeam(player)
-        if stat == 'all_damage_dealt':
-            return self.game.player_tracking[-1][team][player].stats['hero_damage_dealt'][-1] + self.game.player_tracking[-1][team][player].stats['barrier_damage_dealt'][-1]
-        else:
-            return self.game.player_tracking[-1][team][player].stats[stat][-1]
+        try:
+            if team == None:
+                team = self.GetTeam(player)
+            if stat == 'all_damage_dealt':
+                return self.game.player_tracking[-1][team][player].stats['hero_damage_dealt'][-1] + self.game.player_tracking[-1][team][player].stats['barrier_damage_dealt'][-1]
+            else:
+                return self.game.player_tracking[-1][team][player].stats[stat][-1]
+        except:
+            return 0
 
     # Get stat per minute for given player
     def GetStatPerMinute(self, player, stat, team=None):
