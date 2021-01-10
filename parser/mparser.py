@@ -19,6 +19,8 @@ class MatrixParser:
             game.map_type = MatrixGame.MAP_TYPES[game.map]
             game.player_tracking.append([{}, {}])
             game.kill_tracking.append([])
+            game.rez_tracking.append([])
+            game.dupe_tracking.append({})
             game.section_lengths.append(999999)
             KD_track = [None, None] # [killer, victim]
             runningTS = 0
@@ -30,6 +32,8 @@ class MatrixParser:
                 if line[0] == game.map: # new part of map / next side
                     game.player_tracking.append([{}, {}])
                     game.kill_tracking.append([])
+                    game.rez_tracking.append([])
+                    game.dupe_tracking.append({})
                     for team in game.player_tracking[-1]:
                         for player in team:
                             game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
@@ -47,6 +51,12 @@ class MatrixParser:
                                 KD_track = [line[1], line[1]]
                         elif line[2] == "FinalBlow": # hero final blow
                             KD_track[0] = line[1]
+                        elif line[1] == "Suicide": # hero suicide
+                            game.kill_tracking[-1].append((runningTS, line[2], line[2]))
+                        elif line[1] == "Resurrected": # hero rezzed
+                            game.rez_tracking[-1].append((runningTS, line[2]))
+                        elif line[1] == "DuplicatingEnd": # end dupe
+                            game.dupe_tracking[-1][line[2]][-1][1] = runningTS
                         else: # map info
                             game.map_tracking.append(MatrixMapInfo())
                             if game.map_type == "Control":
@@ -63,6 +73,16 @@ class MatrixParser:
                         if KD_track[0] is not None and KD_track[1] is not None:
                             game.kill_tracking[-1].append((runningTS, KD_track[0], KD_track[1]))
                             KD_track = [None, None]
+                    
+                    elif len(line) == 4:
+                        if line[1] == "DuplicatingStart":
+                            if line[2] not in game.dupe_tracking[-1]:
+                                game.dupe_tracking[-1][line[2]] = []
+                            game.dupe_tracking[-1][line[2]].append([runningTS, 0, line[3]])
+                    
+                    elif len(line) == 5:
+                        if line[1] == "FinalBlow":
+                            game.kill_tracking[-1].append((runningTS, line[2], line[3])) # later will add what died to, which is line[4]
 
                     else: # player info
                         if len(line) >= 24:

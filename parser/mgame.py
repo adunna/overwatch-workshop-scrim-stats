@@ -29,6 +29,8 @@ class MatrixGame:
         self.map_type = ""
         self.map_tracking = [] # [mapinfo, ...]
         self.kill_tracking = [] # [[(timestamp, killer, victim), ...], ...]
+        self.rez_tracking = [] # [[(timestamp, rezzed), ...], ...]
+        self.dupe_tracking = [] # [{player: [[start_timestamp, end_timestamp, hero_duped], ...], ...}, ...]
         self.player_tracking = [] # [[team1, team2], ...]
         self.section_lengths = []  # [N, ...] one number for each section
         self.team_names = [] # [team 1, team 2]
