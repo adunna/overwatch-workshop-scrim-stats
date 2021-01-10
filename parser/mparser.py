@@ -1,22 +1,28 @@
 from mgame import MatrixGame, MatrixPlayer, MatrixMapInfo
+from mconsts import *
 
 class MatrixParser:
-
-    HERO_REMAPS = {'LÃºcio': 'Lucio', 'Torbjörn': 'Torbjorn', 'Wrecking Ball': 'WreckingBall', 'Soldier: 76': 'Soldier76'}
 
     def __init__(self):
         pass
 
     def readLog(self, filename):
         game = MatrixGame()
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             firstline = next(f).strip().split("]")[1][1:].split(",")
             game.map = firstline[0]
+            if game.map in KR_REMAP_MAPS:
+                game.map = KR_REMAP_MAPS[game.map]
+                game.language = LANG_KR
             if len(firstline) == 3:
                 game.team_names = [firstline[1], firstline[2]]
             else:
-                game.team_names = ["Team 1", "Team 2"]
-            game.map_type = MatrixGame.MAP_TYPES[game.map]
+                if game.language == LANG_EN:
+                    game.team_names = ["Team 1", "Team 2"]
+                elif game.language == LANG_KR:
+                    game.team_names = ["1팀", "2팀"]
+
+            game.map_type = MAP_TYPES[game.map]
             game.player_tracking.append([{}, {}])
             game.kill_tracking.append([])
             game.rez_tracking.append([])
@@ -30,7 +36,7 @@ class MatrixParser:
 
             for lineNumber, line in enumerate(PARSEDFILE):
 
-                if line[0] == game.map: # new part of map / next side
+                if (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
                     game.player_tracking.append([{}, {}])
                     game.kill_tracking.append([])
                     game.overall_deaths.append({})
@@ -86,7 +92,10 @@ class MatrixParser:
                         if line[1] == "DuplicatingStart":
                             if line[2] not in game.dupe_tracking[-1]:
                                 game.dupe_tracking[-1][line[2]] = []
-                            game.dupe_tracking[-1][line[2]].append([runningTS, 0, line[3]])
+                            if game.language == LANG_EN:
+                                game.dupe_tracking[-1][line[2]].append([runningTS, 0, line[3]])
+                            elif game.language == LANG_KR:
+                                game.dupe_tracking[-1][line[2]].append([runningTS, 0, KR_REMAP_HEROES[line[3]]])
 
                     elif len(line) == 5:
                         if line[1] == "FinalBlow":
@@ -111,14 +120,17 @@ class MatrixParser:
                             game.player_tracking[-1][playerTeam][playerName].team = playerTeam
                         try:
                             game.player_tracking[-1][playerTeam][playerName].stats['position'].append((float(line[20][1:]), float(line[21]), float(line[22][:-1])))
-                            if line[2] in self.HERO_REMAPS:
-                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(self.HERO_REMAPS[line[2]])
-                            elif 'Torb' in line[2]:
-                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append('Torbjorn')
-                            elif 'cio' in line[2]:
-                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append('Lucio')
-                            else:
-                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(line[2])
+                            if game.language == LANG_EN:
+                                if line[2] in HERO_REMAPS:
+                                    game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(HERO_REMAPS[line[2]])
+                                elif 'Torb' in line[2]:
+                                    game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append('Torbjorn')
+                                elif 'cio' in line[2]:
+                                    game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append('Lucio')
+                                else:
+                                    game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(line[2])
+                            elif game.language == LANG_KR:
+                                game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(KR_REMAP_HEROES[line[2]])
                             game.player_tracking[-1][playerTeam][playerName].stats['hero_damage_dealt'].append(float(line[3]))
                             game.player_tracking[-1][playerTeam][playerName].stats['barrier_damage_dealt'].append(float(line[4]))
                             game.player_tracking[-1][playerTeam][playerName].stats['damage_blocked'].append(float(line[5]))

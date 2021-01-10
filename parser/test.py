@@ -3,7 +3,7 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-#MJ = MatrixJSON("../samples/Log-2021-01-09-19-11-26.txt")
+#MJ = MatrixJSON("../samples/Log-2021-01-09-22-28-27.txt")
 #MJ.DumpJSON()
 #pprint.pprint(MJ.DumpJSON()['match_events']['ultimates'])
 
@@ -11,7 +11,7 @@ import pprint
 parseEngine = MatrixParser()
 game = parseEngine.readLog("../samples/Log-2021-01-09-22-28-27.txt") # krtest.txt
 analyzer = MatrixAnalyzer(game)
-print(game.dupe_tracking)
+print(game.kill_tracking)
 
 # old
 #parseEngine = MatrixParser()

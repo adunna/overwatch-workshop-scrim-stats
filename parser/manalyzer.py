@@ -1,26 +1,8 @@
 from collections import defaultdict
 from mgame import MatrixGame
+from mconsts import *
 
 class MatrixAnalyzer:
-
-    HEROTYPE_ROLE_MAPS = {
-        'tank': ['main_tank', 'off_tank'],
-        'dps': ['hitscan_dps', 'flex_dps'],
-        'support': ['main_support', 'flex_support']
-    }
-    HEROTYPE_MAPS = {
-        'tank': set(['D.Va', 'Orisa', 'Reinhardt', 'Roadhog', 'Sigma', 'Winston', 'WreckingBall', 'Zarya']),
-        'dps': set(['Ashe', 'Bastion', 'Doomfist', 'Echo', 'Genji', 'Hanzo', 'Junkrat', 'McCree', 'Mei', 'Pharah', 'Reaper', 'Soldier76', 'Sombra', 'Symmetra', 'Torbjorn', 'Tracer', 'Widowmaker']),
-        'support': set(['Ana', 'Baptiste', 'Brigitte', 'Lucio', 'Mercy', 'Moira', 'Zenyatta'])
-    }
-    ROLE_MAPS = {
-        'main_tank': ['Reinhardt', 'Orisa', 'Winston', 'WreckingBall', 'Sigma', 'Roadhog', 'Zarya', 'D.Va'],
-        'hitscan_dps': ['Ashe', 'Widowmaker', 'McCree', 'Soldier76', 'Reaper', 'Tracer', 'Sombra', 'Bastion', 'Hanzo', 'Symmetra', 'Echo', 'Mei', 'Torbjorn', 'Pharah', 'Doomfist', 'Genji', 'Junkrat'],
-        'main_support': ['Lucio', 'Mercy', 'Brigitte', 'Zenyatta', 'Baptiste', 'Moira', 'Ana']
-    }
-    ROLE_MAPS['off_tank'] = ROLE_MAPS['main_tank'][::-1]
-    ROLE_MAPS['flex_dps'] = ROLE_MAPS['hitscan_dps'][::-1]
-    ROLE_MAPS['flex_support'] = ROLE_MAPS['main_support'][::-1]
 
     def __init__(self, game):
         self.game = game
@@ -65,8 +47,8 @@ class MatrixAnalyzer:
                     mostplayed[player] = hero
         player_roles = {}
         for player in mostplayed:
-            for herotype in self.HEROTYPE_MAPS:
-                if mostplayed[player] in self.HEROTYPE_MAPS[herotype]:
+            for herotype in HEROTYPE_MAPS:
+                if mostplayed[player] in HEROTYPE_MAPS[herotype]:
                     player_roles[player] = herotype
                     break
         return player_roles
@@ -82,28 +64,28 @@ class MatrixAnalyzer:
                 for hero in heroes_played:
                     if heroes_played[hero] > heroes_played[mostplayed[player]]:
                         mostplayed[player] = hero
-            player_types = {x: [] for x in self.HEROTYPE_MAPS} # role: [player, player], ...
+            player_types = {x: [] for x in HEROTYPE_MAPS} # role: [player, player], ...
             for player in mostplayed:
-                for herotype in self.HEROTYPE_MAPS:
-                    if mostplayed[player] in self.HEROTYPE_MAPS[herotype]:
+                for herotype in HEROTYPE_MAPS:
+                    if mostplayed[player] in HEROTYPE_MAPS[herotype]:
                         player_types[herotype].append(player)
                         break
             # now we can infer specific roles
             player_roles = {} # {player: role, ...}
             for herotype in player_types: # find main tank, main supp, and hitscan then assign other types
                 firstoccs = [99, 99] # which player has lower number for role
-                searching = self.HEROTYPE_ROLE_MAPS[herotype][0] # role we're searching
-                for i in range(0, len(self.ROLE_MAPS[searching])):
-                    if self.ROLE_MAPS[searching][i] == mostplayed[player_types[herotype][0]]:
+                searching = HEROTYPE_ROLE_MAPS[herotype][0] # role we're searching
+                for i in range(0, len(ROLE_MAPS[searching])):
+                    if ROLE_MAPS[searching][i] == mostplayed[player_types[herotype][0]]:
                         firstoccs[0] = i
-                    if self.ROLE_MAPS[searching][i] == mostplayed[player_types[herotype][1]]:
+                    if ROLE_MAPS[searching][i] == mostplayed[player_types[herotype][1]]:
                         firstoccs[1] = i
                 if firstoccs[0] < firstoccs[1]: # first player is this role
                     player_roles[player_types[herotype][0]] = searching
-                    player_roles[player_types[herotype][1]] = self.HEROTYPE_ROLE_MAPS[herotype][1]
+                    player_roles[player_types[herotype][1]] = HEROTYPE_ROLE_MAPS[herotype][1]
                 else:
                     player_roles[player_types[herotype][1]] = searching
-                    player_roles[player_types[herotype][0]] = self.HEROTYPE_ROLE_MAPS[herotype][1]
+                    player_roles[player_types[herotype][0]] = HEROTYPE_ROLE_MAPS[herotype][1]
             return player_roles
         except: # not 2/2/2
             return self.GetInferRoleGroups(team)
