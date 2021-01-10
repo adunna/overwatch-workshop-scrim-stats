@@ -116,6 +116,8 @@ class MatrixJSON:
                                 match_event_id += 1
 
         return {
+                "game_map": self.game.map,
+                "game_map_type": self.game.map_type,
                 "players": players,
                 "heroes_played": heroes_played,
                 "final_stats": final_stats,
