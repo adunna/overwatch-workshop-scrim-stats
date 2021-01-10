@@ -1,0 +1,33 @@
+Lobby:
+DONE- Investigate & fix Mei damage numbers (esp. in spectator overlay)
+DONE- Add toggles for spectator HUD options and pause/DC resume option
+DONE- Reduce the "add time" buttons to just one button, and make that an option
+DONE- Increasing efficiency of lobby so don't reach event cap
+- Efficient D/C resume
+DONE- Add resurrection data
+DONE- Find how to fix Echo ult info
+DONE- Add map objective point (index)
+DONE- Add cooldowns to spectator HUD & update spectator HUD
+- Allow toggle between hero/barrier split and merged damage in spectator overlay
+DONE- Add toggle to set "tournament" version where doesn't reset scores for scrimming
+DONE- Add what person died to
+
+- D/C resume don't allow swapping - force onto hero
+
+Web Panel:
+- Add map to webpage + CSV output
+- Update echo ult fix
+- Include event timeline legend
+
+Parser:
+DONE- Add resurrect parsing
+DONE- Update final blow/death and suicide format
+- Update map index
+DONE- Update echo ult fix
+- Support Korean text parsing (just map Korean map/hero names into English)
+- Make new "#underthehood" channel with field mapping in log file (types of fields, and each field for each type based on line length)
+
+
+
+
+Map, Section w/ Title, Start Timestamp, End Timestamp, Fight Winner, Main Tank, Off Tank, ... players and heroes, Columns for each player include number of final blows, # eliminations, had ult, ult used, died to, what died to, timestamp died
