@@ -9,7 +9,7 @@ import pprint
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2021-01-09-21-54-16.txt")
+game = parseEngine.readLog("../samples/Log-2021-01-09-22-32-16.txt")
 analyzer = MatrixAnalyzer(game)
 print(game.kill_tracking)
 
