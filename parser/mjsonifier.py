@@ -52,7 +52,7 @@ class MatrixJSON:
         # match events info
         # format each player into one group, for each team
         # can do separately for each section
-        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': [], 'sections_viz': [], 'ultimates': []}
+        match_events = {'kills': [], 'sections': [0], 'fights': [], 'heroes': [], 'sections_viz': [], 'ultimates': [], 'resurrections': []}
         match_event_id = 1
         last_time_end = 0
         all_players = []
@@ -99,6 +99,10 @@ class MatrixJSON:
                 for player in team:
                     match_events['sections_viz'].append({'id': match_event_id, 'group': player, 'type': 'background', 'start': section*1000, 'end': (section+1)*1000, 'className': 'section-bg'})
                     match_event_id += 1
+        for section_num, section in enumerate(self.game.rez_tracking):
+            for rez_point in section:
+                match_events['resurrections'].append({'id': match_event_id, 'group': rez_point[1], 'type': 'point', 'start': (rez_point[0] + match_events['sections'][section_num])*1000, 'className': 'event-resurrection'})
+                match_event_id += 1
         for team_num, team in enumerate(players_ordered):
             for player in team:
                 ult_timings = self.Analyzer.GetUltTiming(player, team_num)
