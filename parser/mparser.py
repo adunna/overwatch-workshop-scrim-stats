@@ -14,7 +14,7 @@ class MatrixParser:
             if game.map in KR_REMAP_MAPS:
                 game.map = KR_REMAP_MAPS[game.map]
                 game.language = LANG_KR
-            if len(firstline) == 3:
+            if len(firstline) == 3 or len(firstline) == 4:
                 game.team_names = [firstline[1], firstline[2]]
             else:
                 if game.language == LANG_EN:

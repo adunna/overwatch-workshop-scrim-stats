@@ -3,13 +3,13 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-MJ = MatrixJSON("../samples/Log-2021-01-09-22-32-16.txt")
+MJ = MatrixJSON("../samples/test.txt")
 MJ.DumpJSON()
-pprint.pprint(MJ.DumpJSON()['match_events']['resurrections'])
+#pprint.pprint(MJ.DumpJSON())
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2021-01-09-22-32-16.txt")
+game = parseEngine.readLog("../samples/test.txt")
 analyzer = MatrixAnalyzer(game)
 print(game.dupe_tracking)
 

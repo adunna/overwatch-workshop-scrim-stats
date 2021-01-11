@@ -126,6 +126,7 @@ class MatrixAnalyzer:
         return (statSum / statCount) * 60
 
     # Get time ultimate available at, and time ultimate used, for given player for each section
+    ## Includes Echo duplicate ultimates
     def GetUltTiming(self, player, team=None):
         if team is None:
             team = self.GetTeam(player)
@@ -145,6 +146,7 @@ class MatrixAnalyzer:
         return ult_times
 
     # Get times ultimates used for given player, for each section
+    ## Excludes Echo duplicate ultimates
     def GetTimesUltimateUsed(self, player, team=None):
         if team is None:
             team = self.GetTeam(player)
@@ -164,6 +166,7 @@ class MatrixAnalyzer:
         return times_ult_used
 
     # Get time to ultimate (in seconds) for each ultimate for given player
+    ## Excludes Echo duplicate ultimates
     def GetTimesToUltimate(self, player, team=None):
         if team == None:
             team = self.GetTeam(player)
@@ -188,6 +191,7 @@ class MatrixAnalyzer:
         return times_to_ult
 
     # Get time ultimate held (in seconds) for each ultimate for given player
+    ## Excludes Echo duplicate ultimates
     def GetTimesUltimateHeld(self, player, team=None):
         if team == None:
             team = self.GetTeam(player)
@@ -212,6 +216,7 @@ class MatrixAnalyzer:
         return times_ult_held
 
     # Get average time to ultimate (in seconds) for given player
+    ## Excludes Echo duplicate ultimates
     def GetAverageTimeToUltimate(self, player, team=None):
         times_to_ult = self.GetTimesToUltimate(player, team)
         if len(times_to_ult) > 0:
@@ -219,6 +224,7 @@ class MatrixAnalyzer:
         return 0
 
     # Get average time ultimate held (in seconds) for given player
+    ## Excludes Echo duplicate ultimates
     def GetAverageTimeUltimateHeld(self, player, team=None):
         times_ult_held = self.GetTimesUltimateHeld(player, team)
         if len(times_ult_held) > 0:
