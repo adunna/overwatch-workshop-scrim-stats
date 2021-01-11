@@ -12,6 +12,7 @@ parseEngine = MatrixParser()
 game = parseEngine.readLog("../samples/Rialto.txt")
 analyzer = MatrixAnalyzer(game)
 print(game.dupe_tracking)
+print(analyzer.GetUltTiming("bruhnuts", 1))
 
 # old
 #parseEngine = MatrixParser()

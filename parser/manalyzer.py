@@ -126,7 +126,7 @@ class MatrixAnalyzer:
         return (statSum / statCount) * 60
 
     # Get time ultimate available at, and time ultimate used, for given player for each section
-    ## Includes Echo duplicate ultimates
+    ## Excludes Echo duplicate ultimates
     def GetUltTiming(self, player, team=None):
         if team is None:
             team = self.GetTeam(player)
@@ -135,11 +135,17 @@ class MatrixAnalyzer:
             ult_times_sec = []
             ult_earned_ts = -1
             for i in range(1, self.game.section_lengths[section_num]):
-                if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
-                    ult_earned_ts = i
-                if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
-                    ult_times_sec.append((ult_earned_ts, i))
-                    ult_earned_ts = -1
+                should_do = True
+                if player in self.game.dupe_tracking[section_num]:
+                    for dupe in self.game.dupe_tracking[section_num][player]:
+                        if i >= dupe[0] + 1 and i <= dupe[1]:
+                            should_do = False
+                if should_do:
+                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                        ult_earned_ts = i
+                    if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                        ult_times_sec.append((ult_earned_ts, i))
+                        ult_earned_ts = -1
             if ult_earned_ts != -1:
                 ult_times_sec.append((ult_earned_ts, -1))
             ult_times.append(ult_times_sec)
@@ -178,7 +184,7 @@ class MatrixAnalyzer:
                 should_do = True
                 if player in self.game.dupe_tracking[section_num]:
                     for dupe in self.game.dupe_tracking[section_num][player]:
-                        if i >= dupe[0] and i <= dupe[1]:
+                        if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
                     if section[team][player].stats['ultimates_earned'][i] != prev_ults_earned:
@@ -202,7 +208,7 @@ class MatrixAnalyzer:
                 should_do = True
                 if player in self.game.dupe_tracking[section_num]:
                     for dupe in self.game.dupe_tracking[section_num][player]:
-                        if i >= dupe[0] and i <= dupe[1]:
+                        if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
                     if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_used'][i]:
