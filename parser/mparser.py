@@ -79,7 +79,7 @@ class MatrixParser:
                                 game.map_tracking[-1][-1].team1Capture = float(line[1])
                                 game.map_tracking[-1][-1].team2Capture = float(line[2])
                             else:
-                                game.map_tracking[-1][-1].attacker = 1 if line[1] == "True" else 0
+                                game.map_tracking[-1][-1].attacker = 0 if line[1] == "True" else 1
                                 game.map_tracking[-1][-1].progress = float(line[2])
                             if (game.map_type == "Hybrid" or game.map_type == "Assault") and len(game.map_tracking[-1]) > 2:
                                 game.map_tracking[-1][-1].pointCaptured = game.map_tracking[-1][-2].pointCaptured

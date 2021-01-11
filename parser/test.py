@@ -5,7 +5,7 @@ import pprint
 
 MJ = MatrixJSON("../samples/Rialto.txt")
 MJ.DumpJSON()
-pprint.pprint(MJ.DumpJSON())
+#pprint.pprint(MJ.DumpJSON())
 
 # new
 parseEngine = MatrixParser()
@@ -14,7 +14,6 @@ parseEngine.write_csv(game, '../samples/TEST.csv')
 
 analyzer = MatrixAnalyzer(game)
 print(game.dupe_tracking)
-print(analyzer.GetUltTiming("bruhnuts", 1))
 analyzer.WriteAuxillaryCSVs('../samples/TEST')
 
 # old

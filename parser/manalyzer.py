@@ -621,10 +621,11 @@ class MatrixAnalyzer:
         # get data
         fights = self.GetFights()
         with open(out_base_filename + '_fights.csv', 'w') as o:
+            mapTypeSection = 'Section' if self.game.map_type == 'Control' else 'Attacker'
             o.write(
-                'Map,Section,Fight,Start Timestamp,End Timestamp,Winner,First FB,First Death,First Ult Used'
+                'Map,' + mapTypeSection + ',Fight,Start Timestamp,End Timestamp,Winner,First FB,First FB Hero,First Death,First Death Hero,First Ult Used,First Ult Used Hero'
             )
-            colCount = 9
+            colCount = 12
             for teamnum in self.game.team_names:
                 for role_num, role in enumerate(ROLE_LIST):
                     o.write(',' + teamnum + ' ' + role)
@@ -646,7 +647,8 @@ class MatrixAnalyzer:
             fightNum = 0
             for section_num, section in enumerate(fights):
                 for fight in section:
-                    map_info = [self.game.map, section_num, fightNum, fight[0], fight[1]]
+                    section_info = section_num if self.game.map_type == 'Control' else self.game.team_names[self.game.map_tracking[section_num][fight[0]].attacker]
+                    map_info = [self.game.map, section_info, fightNum, fight[0], fight[1]]
 
                     fight_winner_num = self.GetFightWinner(section_num, fight[0], fight[1])
                     if fight_winner_num == -1:
@@ -654,10 +656,10 @@ class MatrixAnalyzer:
                     else:
                         fight_winner = self.game.team_names[fight_winner_num]
 
-                    first_fb = self.GetFirstFinalBlow(section_num, fight[0], fight[1])[0]
-                    first_death = self.GetFirstDeath(section_num, fight[0], fight[1])[0]
-                    first_ult_used = self.GetFirstUltUsed(section_num, fight[0], fight[1])[0]
-                    fight_info = [fight_winner, first_fb, first_death, first_ult_used]
+                    first_fb = self.GetFirstFinalBlow(section_num, fight[0], fight[1])
+                    first_death = self.GetFirstDeath(section_num, fight[0], fight[1])
+                    first_ult_used = self.GetFirstUltUsed(section_num, fight[0], fight[1])
+                    fight_info = [fight_winner, first_fb[0], first_fb[1], first_death[0], first_death[1], first_ult_used[0], first_ult_used[1]]
 
                     player_info = []
                     player_fight_info = []
