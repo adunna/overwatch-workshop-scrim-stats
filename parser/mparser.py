@@ -23,6 +23,7 @@ class MatrixParser:
                     game.team_names = ["1팀", "2팀"]
 
             game.map_type = MAP_TYPES[game.map]
+            game.map_tracking.append([])
             game.player_tracking.append([{}, {}])
             game.kill_tracking.append([])
             game.rez_tracking.append([])
@@ -37,6 +38,7 @@ class MatrixParser:
             for lineNumber, line in enumerate(PARSEDFILE):
 
                 if (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
+                    game.map_tracking.append([])
                     game.player_tracking.append([{}, {}])
                     game.kill_tracking.append([])
                     game.overall_deaths.append({})
@@ -72,17 +74,17 @@ class MatrixParser:
                         elif line[1] == "DuplicatingEnd": # end dupe
                             game.dupe_tracking[-1][line[2]][-1][1] = runningTS
                         else: # map info
-                            game.map_tracking.append(MatrixMapInfo())
+                            game.map_tracking[-1].append(MatrixMapInfo())
                             if game.map_type == "Control":
-                                game.map_tracking[-1].team1Capture = float(line[1])
-                                game.map_tracking[-1].team2Capture = float(line[2])
+                                game.map_tracking[-1][-1].team1Capture = float(line[1])
+                                game.map_tracking[-1][-1].team2Capture = float(line[2])
                             else:
-                                game.map_tracking[-1].attacker = 1 if line[1] == "True" else 0
-                                game.map_tracking[-1].progress = float(line[2])
-                            if (game.map_type == "Hybrid" or game.map_type == "Assault") and len(game.map_tracking) > 2:
-                                game.map_tracking[-1].pointCaptured = game.map_tracking[-2].pointCaptured
-                                if game.map_tracking[-1].progress == 0 and game.map_tracking[-2].progress >= 80:
-                                    game.map_tracking[-1].pointCaptured = True
+                                game.map_tracking[-1][-1].attacker = 1 if line[1] == "True" else 0
+                                game.map_tracking[-1][-1].progress = float(line[2])
+                            if (game.map_type == "Hybrid" or game.map_type == "Assault") and len(game.map_tracking[-1]) > 2:
+                                game.map_tracking[-1][-1].pointCaptured = game.map_tracking[-1][-2].pointCaptured
+                                if game.map_tracking[-1][-1].progress == 0 and game.map_tracking[-1][-2].progress >= 80:
+                                    game.map_tracking[-1][-1].pointCaptured = True
 
                         if KD_track[0] is not None and KD_track[1] is not None:
                             game.kill_tracking[-1].append((runningTS, KD_track[0], KD_track[1]))
@@ -189,13 +191,14 @@ class MatrixParser:
 
     def write_csv(self, game, out_filename):
         with open(out_filename, 'w') as o:
-            o.write('Section,Timestamp,Team,Player,Hero,Hero Damage Dealt,Barrier Damage Dealt,Damage Blocked,Damage Taken,Deaths,Eliminations,Final Blows,Environmental Deaths,Environmental Kills,Healing Dealt,Objective Kills,Solo Kills,Ultimates Earned,Ultimates Used,Healing Received,Ultimate Charge,Player Closest to Reticle,Cooldown 1,Cooldown 2,Position\n')
+            o.write('Map,Section,Timestamp,Team,Player,Hero,Hero Damage Dealt,Barrier Damage Dealt,Damage Blocked,Damage Taken,Deaths,Eliminations,Final Blows,Environmental Deaths,Environmental Kills,Healing Dealt,Objective Kills,Solo Kills,Ultimates Earned,Ultimates Used,Healing Received,Ultimate Charge,Player Closest to Reticle,Cooldown 1,Cooldown 2,Position\n')
             for section in range(0, len(game.player_tracking)):
                 for ts in range(0, game.section_lengths[section]):
                     for team in range(0, len(game.player_tracking[section])):
                         for player in game.player_tracking[section][team]:
                             if ts < len(game.player_tracking[section][team][player].stats['hero_damage_dealt']):
-                                o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+                                o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+                                    game.map,
                                     section,
                                     ts,
                                     game.team_names[0] if team == 0 else game.team_names[1],

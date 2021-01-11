@@ -21,29 +21,7 @@ class MatrixJSON:
         avg_time_to_ult = [{player: self.Analyzer.GetAverageTimeToUltimate(player, team) for player in players[team]} for team in players]
         avg_time_ult_held = [{player: self.Analyzer.GetAverageTimeUltimateHeld(player, team) for player in players[team]} for team in players]
         inferred_roles = [self.Analyzer.GetInferRoles(team) for team in players]
-        players_ordered = []
-        desired_order = ['main_tank', 'off_tank', 'hitscan_dps', 'flex_dps', 'main_support', 'flex_support']
-        desired_order_backup = ['tank', 'tank', 'dps', 'dps', 'support', 'support']
-        for team in players:
-            placed = 0
-            prev_placed = placed
-            ordering = desired_order
-            if inferred_roles[team][players[team][0]] not in desired_order:
-                ordering = desired_order_backup
-            team_ordered = []
-            while len(players[team]) > placed:
-                prev_placed = placed
-                for player in players[team]:
-                    if inferred_roles[team][player] == ordering[placed]:
-                        team_ordered.append(player)
-                        placed += 1
-                        if placed == len(players[team]):
-                            break
-                if prev_placed == placed: # encountered some error
-                    placed = len(players[team])
-                    team_ordered = players[team]
-                    break
-            players_ordered.append(team_ordered)
+        players_ordered = self.Analyzer.GetPlayerOrder(inferred_roles, players)
 
         team_damage_over_time = {
                 "team1": self.Analyzer.GetAllTotalDamages(team=0),
@@ -71,12 +49,7 @@ class MatrixJSON:
         fights = self.Analyzer.GetFights()
         for section_num, section in enumerate(fights):
             for fight in section:
-                fbs = self.Analyzer.GetTeamFinalBlows(section_num, fight[0], fight[1])
-                fight_winner = -1
-                if len(fbs[0]) > len(fbs[1]):
-                    fight_winner = 0
-                elif len(fbs[1]) > len(fbs[0]):
-                    fight_winner = 1
+                fight_winner = self.Analyzer.GetFightWinner(section_num, fight[0], fight[1])
                 for team_num, team in enumerate(players_ordered):
                     for player in team:
                         fightclass = 'fight-tie-bg'
@@ -122,6 +95,7 @@ class MatrixJSON:
         return {
                 "game_map": self.game.map,
                 "game_map_type": self.game.map_type,
+                "game_map_score": self.game.map_score,
                 "players": players,
                 "heroes_played": heroes_played,
                 "final_stats": final_stats,

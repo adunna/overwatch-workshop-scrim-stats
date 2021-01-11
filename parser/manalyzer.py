@@ -245,7 +245,7 @@ class MatrixAnalyzer:
         team2heroes = []
         for team in range(0, 2):
             for player in self.game.player_tracking[section][team]:
-                if self.game.player_tracking[section][team][player].stats['ultimate_charge'][timestamp] >= 90:
+                if self.game.player_tracking[section][team][player].stats['ultimate_charge'][timestamp] >= HAS_ULT_CUTOFF:
                     if team == 0:
                         team1players.append(player)
                         team1heroes.append(self.game.player_tracking[section][team][player].stats['heroes'][timestamp])
@@ -528,29 +528,178 @@ class MatrixAnalyzer:
                 cumulative_dists.append(cumulative_dist)
         return (sum(avg_dists)/len(avg_dists), sum(cumulative_dists)/len(cumulative_dists))
 
+    # Get ordered players based on role inferencing
+    def GetPlayerOrder(self, inferred_roles, players):
+        players_ordered = []
+        desired_order = ['main_tank', 'off_tank', 'hitscan_dps', 'flex_dps', 'main_support', 'flex_support']
+        desired_order_backup = ['tank', 'tank', 'dps', 'dps', 'support', 'support']
+        for team in players:
+            placed = 0
+            prev_placed = placed
+            ordering = desired_order
+            if inferred_roles[team][players[team][0]] not in desired_order:
+                ordering = desired_order_backup
+            team_ordered = []
+            while len(players[team]) > placed:
+                prev_placed = placed
+                for player in players[team]:
+                    if inferred_roles[team][player] == ordering[placed]:
+                        team_ordered.append(player)
+                        placed += 1
+                        if placed == len(players[team]):
+                            break
+                if prev_placed == placed: # encountered some error
+                    placed = len(players[team])
+                    team_ordered = players[team]
+                    break
+            players_ordered.append(team_ordered)
+        return players_ordered
+
+    # Get number of FBs for given player in given section, between given timestamps (inclusive)
+    def GetNumFBsBtwn(self, player, section, start, end, team=None): # returns integer
+        if team is None:
+            team = self.GetTeam(player)
+        fbcount = 0
+        for ts in range(start, end + 1):
+            for c in range(0, self.game.player_tracking[section][team][player].stats['final_blows'][ts] - self.game.player_tracking[section][team][player].stats['final_blows'][ts-1]):
+                fbcount += 1
+        return fbcount
+
+    # Get number of eliminations for given player in given section, between given timestamps (inclusive)
+    def GetNumElimsBtwn(self, player, section, start, end, team=None): # returns integer
+        if team is None:
+            team = self.GetTeam(player)
+        elimcount = 0
+        for ts in range(start, end + 1):
+            for c in range(0, self.game.player_tracking[section][team][player].stats['eliminations'][ts] - self.game.player_tracking[section][team][player].stats['eliminations'][ts-1]):
+                elimcount += 1
+        return elimcount
+
+    # Check if player used ultimate for given player in given section, between given timestamps (inclusive)
+    def GetPlayerUsedUlt(self, player, section, start, end, team=None): # returns boolean
+        if team is None:
+            team = self.GetTeam(player)
+        for ts in range(start, end + 1):
+            if self.game.player_tracking[section][team][player].stats['ultimates_used'][ts] != self.game.player_tracking[section][team][player].stats['ultimates_used'][ts-1]:
+                return True
+        return False
+
+    # Get first death of player in given section, between given timestamps (inclusive)
+    def GetFirstDeathBtwn(self, player, section, start, end, team=None): # returns None if no death, (ts, killer) if died
+        if team is None:
+            team = self.GetTeam(player)
+        for kill_event in self.game.kill_tracking[section]: # (timestamp, killer, victim)
+            if kill_event[2] == player and kill_event[0] >= start and kill_event[0] <= end:
+                return (kill_event[0], kill_event[1])
+        return None
+
+    # Get fight winner between given timestamps in given section (inclusive)
+    def GetFightWinner(self, section, start, end): # returns 0, 1, or -1 if unknown
+        fbs = self.GetTeamFinalBlows(section, start, end)
+        fight_winner = -1
+        if len(fbs[0]) > len(fbs[1]):
+            fight_winner = 0
+        elif len(fbs[1]) > len(fbs[0]):
+            fight_winner = 1
+        if fight_winner == -1: # if tie, team with point capture has won fight
+            if self.game.map_type == 'Control':
+                if self.game.map_tracking[section][end].team1Capture > self.game.map_tracking[section][end].team2Capture:
+                    fight_winner = 0
+                elif self.game.map_tracking[section][end].team1Capture < self.game.map_tracking[section][end].team2Capture:
+                    fight_winner = 1
+                else:
+                    fight_winner = -1
+            else:
+                if self.game.map_tracking[section][end].progress > self.game.map_tracking[section][end-1].progress:
+                    fight_winner = self.game.map_tracking[section][end].attacker
+                else:
+                    fight_winner = 1 - self.game.map_tracking[section][end].attacker
+        return fight_winner
+
     # Write auxillary CSVs
     def WriteAuxillaryCSVs(self, out_base_filename):
         # get data
         fights = self.GetFights()
         with open(out_base_filename + '_fights.csv', 'w') as o:
             o.write(
-                'Section,Start Timestamp,End Timestamp,Winner,First Final Blow,First Death,First Ultimate Used,Team 1 Ultimates Available,Team 2 Ultimates Available,Team 1 Number Final Blows,Team 1 Number Deaths,Team 1 Number Ultimates Used,Team 2 Number Final Blows,Team 2 Number Deaths,Team 2 Number Ultimates Used,Team 1 FBs,Team 1 Deaths,Team 1 Ultimates Used,Team 2 FBs,Team 2 Deaths,Team 2 Ultimates Used\n'
+                'Map,Section,Fight,Start Timestamp,End Timestamp,Winner,First FB,First Death,First Ult Used'
             )
+            colCount = 9
+            for teamnum in self.game.team_names:
+                for role_num, role in enumerate(ROLE_LIST):
+                    o.write(',' + teamnum + ' ' + role)
+                    colCount += 1
+                for role_num, role in enumerate(ROLE_LIST):
+                    o.write(',' + teamnum + ' ' + ROLE_LIST_SHORT[role_num] + ' Hero')
+                    colCount += 1
+            for teamnum in self.game.team_names:
+                for role_num, role in enumerate(ROLE_LIST):
+                    for data_name in [' FBs', ' Elims', ' Had Ult', ' Used Ult', ' Died To', ' Timestamp Died']:
+                        o.write(',' + teamnum + ' ' + ROLE_LIST_SHORT[role_num] + data_name)
+                        colCount += 1
+            o.write('\n')
+
+            players = self.GetPlayers()
+            inferred_roles = [self.GetInferRoles(team) for team in players]
+            players_ordered = self.GetPlayerOrder(inferred_roles, players)
+
+            fightNum = 0
             for section_num, section in enumerate(fights):
                 for fight in section:
-                    first_fb = self.GetFirstFinalBlow(section_num, fight[0], fight[1])
-                    first_death = self.GetFirstDeath(section_num, fight[0], fight[1])
-                    first_ult_used = self.GetFirstUltUsed(section_num, fight[0], fight[1])
-                    fbs = self.GetTeamFinalBlows(section_num, fight[0], fight[1])
-                    deaths = self.GetTeamDeaths(section_num, fight[0], fight[1])
-                    ults_used = self.GetTeamUltsUsed(section_num, fight[0], fight[1])
-                    first_fb_text = first_fb[0] + '|' + first_fb[1] if first_fb[0] != '' else ''
-                    first_death_text = first_death[0] + '|' + first_death[1] if first_death[0] != '' else ''
-                    first_ult_used_text = first_ult_used[0] + '|' + first_ult_used[1] if first_ult_used[0] != '' else ''
-                    available_ults = self.GetUltimatesAvailable(section_num, fight[0])
-                    fight_winner = 'Unknown'
-                    if len(fbs[0]) > len(fbs[1]):
-                        fight_winner = self.game.team_names[0]
-                    elif len(fbs[1]) > len(fbs[0]):
-                        fight_winner = self.game.team_names[1]
-                    o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (section_num, fight[0], fight[1], fight_winner, first_fb_text, first_death_text, first_ult_used_text, '|'.join(available_ults[2]), '|'.join(available_ults[3]), len(fbs[0]), len(deaths[0]), len(ults_used[0]), len(fbs[1]), len(deaths[1]), len(ults_used[1]), '|'.join(fbs[2]), '|'.join(deaths[2]), '|'.join(ults_used[2]), '|'.join(fbs[3]), '|'.join(deaths[3]), '|'.join(ults_used[3])))
+                    map_info = [self.game.map, section_num, fightNum, fight[0], fight[1]]
+
+                    fight_winner_num = self.GetFightWinner(section_num, fight[0], fight[1])
+                    if fight_winner_num == -1:
+                        fight_winner = 'Unknown'
+                    else:
+                        fight_winner = self.game.team_names[fight_winner_num]
+
+                    first_fb = self.GetFirstFinalBlow(section_num, fight[0], fight[1])[0]
+                    first_death = self.GetFirstDeath(section_num, fight[0], fight[1])[0]
+                    first_ult_used = self.GetFirstUltUsed(section_num, fight[0], fight[1])[0]
+                    fight_info = [fight_winner, first_fb, first_death, first_ult_used]
+
+                    player_info = []
+                    player_fight_info = []
+                    for team_num in [0, 1]:
+                        for player_num, player in enumerate(players_ordered[team_num]):
+                            player_info.append(player)
+
+                            player_death = self.GetFirstDeathBtwn(player, section_num, fight[0], fight[1], team_num)
+
+                            player_fight_info += [
+                                self.GetNumFBsBtwn(player, section_num, fight[0], fight[1], team_num),
+                                self.GetNumElimsBtwn(player, section_num, fight[0], fight[1], team_num),
+                                1 if self.game.player_tracking[section_num][team_num][player].stats['ultimate_charge'][fight[0]] >= HAS_ULT_CUTOFF else 0,
+                                int(self.GetPlayerUsedUlt(player, section_num, fight[0], fight[1], team_num)),
+                                player_death[1] if player_death is not None else '',
+                                player_death[0] if player_death is not None else ''
+                            ]
+
+                        for player_num, player in enumerate(players_ordered[team_num]):
+                            player_info.append(self.game.player_tracking[section_num][team_num][player].stats['heroes'][fight[0]])
+
+                    merged_info = [map_info, fight_info, player_info, player_fight_info]
+                    merged_info_dense = [y for x in merged_info for y in x]
+
+                    o.write((('%s,' * min(colCount, len(merged_info_dense)))[:-1] + '\n') % tuple(merged_info_dense))
+
+                    fightNum += 1
+            # for section_num, section in enumerate(fights):
+            #     for fight in section:
+            #         first_fb = self.GetFirstFinalBlow(section_num, fight[0], fight[1])
+            #         first_death = self.GetFirstDeath(section_num, fight[0], fight[1])
+            #         first_ult_used = self.GetFirstUltUsed(section_num, fight[0], fight[1])
+            #         fbs = self.GetTeamFinalBlows(section_num, fight[0], fight[1])
+            #         deaths = self.GetTeamDeaths(section_num, fight[0], fight[1])
+            #         ults_used = self.GetTeamUltsUsed(section_num, fight[0], fight[1])
+            #         first_fb_text = first_fb[0] + '|' + first_fb[1] if first_fb[0] != '' else ''
+            #         first_death_text = first_death[0] + '|' + first_death[1] if first_death[0] != '' else ''
+            #         first_ult_used_text = first_ult_used[0] + '|' + first_ult_used[1] if first_ult_used[0] != '' else ''
+            #         available_ults = self.GetUltimatesAvailable(section_num, fight[0])
+            #         fight_winner = 'Unknown'
+            #         if len(fbs[0]) > len(fbs[1]):
+            #             fight_winner = self.game.team_names[0]
+            #         elif len(fbs[1]) > len(fbs[0]):
+            #             fight_winner = self.game.team_names[1]
+            #         o.write('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (self.game.map, section_num, fight[0], fight[1], fight_winner, first_fb_text, first_death_text, first_ult_used_text, '|'.join(available_ults[2]), '|'.join(available_ults[3]), len(fbs[0]), len(deaths[0]), len(ults_used[0]), len(fbs[1]), len(deaths[1]), len(ults_used[1]), '|'.join(fbs[2]), '|'.join(deaths[2]), '|'.join(ults_used[2]), '|'.join(fbs[3]), '|'.join(deaths[3]), '|'.join(ults_used[3])))

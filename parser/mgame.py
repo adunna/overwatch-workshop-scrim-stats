@@ -6,7 +6,8 @@ class MatrixGame:
         self.language = LANG_EN
         self.map = ""
         self.map_type = ""
-        self.map_tracking = [] # [mapinfo, ...]
+        self.map_score = [0, 0]
+        self.map_tracking = [] # [[mapinfo, ...], ...]
         self.kill_tracking = [] # [[(timestamp, killer, victim), ...], ...]
         self.rez_tracking = [] # [[(timestamp, rezzed), ...], ...]
         self.dupe_tracking = [] # [{player: [[start_timestamp, end_timestamp, hero_duped], ...], ...}, ...]
@@ -19,6 +20,8 @@ class MatrixGame:
 class MatrixMapInfo:
 
     def __init__(self):
+        self.point_number = 0 # TODO: use this for KOTH
+
         # KOTH
         self.team1Capture = 0
         self.team2Capture = 0

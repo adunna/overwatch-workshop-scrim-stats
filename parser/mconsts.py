@@ -1,3 +1,7 @@
+# random consts
+
+HAS_ULT_CUTOFF = 90 # cutoff to determine if player has ultimate going into fight or not
+
 # language remapping
 
 LANG_EN = 0
@@ -96,6 +100,8 @@ HERO_REMAPS = {'LÃºcio': 'Lucio', 'Torbjörn': 'Torbjorn', 'Wrecking Ball': 'W
 
 # herotype & role data
 
+ROLE_LIST = ['Main Tank', 'Off Tank', 'Hitscan DPS', 'Flex DPS', 'Main Support', 'Flex Support']
+ROLE_LIST_SHORT = ['MT', 'OT', 'HSDPS', 'FDPS', 'MS', 'FS']
 HEROTYPE_ROLE_MAPS = {
     'tank': ['main_tank', 'off_tank'],
     'dps': ['hitscan_dps', 'flex_dps'],
