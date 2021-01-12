@@ -141,11 +141,12 @@ class MatrixAnalyzer:
                         if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
-                        ult_earned_ts = i
-                    if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
-                        ult_times_sec.append((ult_earned_ts, i))
-                        ult_earned_ts = -1
+                    if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-2] >= 250:
+                        if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                            ult_earned_ts = i
+                        if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                            ult_times_sec.append((ult_earned_ts, i))
+                            ult_earned_ts = -1
             if ult_earned_ts != -1:
                 ult_times_sec.append((ult_earned_ts, -1))
             ult_times.append(ult_times_sec)
@@ -187,14 +188,15 @@ class MatrixAnalyzer:
                         if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
-                        seen_ult = True
-                        times_to_ult.append(time_to_ult)
-                        time_to_ult = 0
-                    if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
-                        seen_ult = False
-                    if not seen_ult:
-                        time_to_ult += 1
+                    if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-2] >= 250:
+                        if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                            seen_ult = True
+                            times_to_ult.append(time_to_ult)
+                            time_to_ult = 0
+                        if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                            seen_ult = False
+                        if not seen_ult:
+                            time_to_ult += 1
                             
         return times_to_ult
 
@@ -214,10 +216,11 @@ class MatrixAnalyzer:
                         if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
-                        got_ult_times.append(i)
-                    if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
-                        used_ult_times.append(i)
+                    if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-2] >= 250:
+                        if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                            got_ult_times.append(i)
+                        if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                            used_ult_times.append(i)
             if len(got_ult_times) > len(used_ult_times):
                 used_ult_times.append(i)
             for i in range(0, len(got_ult_times)):
