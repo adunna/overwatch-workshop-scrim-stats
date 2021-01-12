@@ -112,6 +112,10 @@ class MatrixAnalyzer:
                 team = self.GetTeam(player)
             if stat == 'all_damage_dealt':
                 return self.game.player_tracking[-1][team][player].stats['hero_damage_dealt'][-1] + self.game.player_tracking[-1][team][player].stats['barrier_damage_dealt'][-1]
+            elif stat == 'ultimates_earned':
+                return self.GetNumberUltsEarnedUsed(player, team)[0]
+            elif stat == 'ultimates_used':
+                return self.GetNumberUltsEarnedUsed(player, team)[1]
             else:
                 return self.game.player_tracking[-1][team][player].stats[stat][-1]
         except:
@@ -124,6 +128,20 @@ class MatrixAnalyzer:
         statSum = self.GetFinalStat(player, stat, team)
         statCount = sum(self.game.section_lengths)
         return (statSum / statCount) * 60
+
+    # Get number of ults earned and used by given player on given team
+    def GetNumberUltsEarnedUsed(self, player, team=None): # returns (num earned, num used)
+        if team is None:
+            team = self.GetTeam(player)
+        ult_times = self.GetUltTiming(player, team)
+        num_earned = 0
+        num_used = 0
+        for section in ult_times:
+            for ult_pair in section:
+                num_earned += 1
+                if ult_pair[1] != -1:
+                    num_used += 1
+        return (num_earned, num_used)
 
     # Get time ultimate available at, and time ultimate used, for given player for each section
     ## Excludes Echo duplicate ultimates

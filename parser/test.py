@@ -3,13 +3,13 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-#MJ = MatrixJSON("../samples/Havana.txt")
-#MJ.DumpJSON()
-#pprint.pprint(MJ.DumpJSON())
+MJ = MatrixJSON("../samples/Havana.txt")
+json_dump = MJ.DumpJSON()
+pprint.pprint(json_dump['final_stats'][0]['scoob'])
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/nXRSPb8yE00XzKOF.txt")
+game = parseEngine.readLog("../samples/Havana.txt")
 
 analyzer = MatrixAnalyzer(game)
 players = analyzer.GetPlayers()
@@ -17,7 +17,6 @@ print(players)
 for team in players:
     for player in players[team]:
         print(player, analyzer.GetAverageTimeToUltimate(player), analyzer.GetAverageTimeUltimateHeld(player))
-#print(analyzer.GetUltTiming('scoob'))
 #print(analyzer.GetAverageTimeToUltimate('scoob'))
 #print(analyzer.GetAverageTimeUltimateHeld('scoob'))
 #analyzer.WriteAuxillaryCSVs('../samples/TEST')
