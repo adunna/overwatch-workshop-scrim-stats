@@ -177,23 +177,25 @@ class MatrixAnalyzer:
         if team == None:
             team = self.GetTeam(player)
         times_to_ult = []
-        prev_ults_earned = 0
         for section_num, section in enumerate(self.game.player_tracking):
             time_to_ult = 0
-            for i in range(0, self.game.section_lengths[section_num]):
+            seen_ult = False
+            for i in range(1, self.game.section_lengths[section_num]):
                 should_do = True
                 if player in self.game.dupe_tracking[section_num]:
                     for dupe in self.game.dupe_tracking[section_num][player]:
                         if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != prev_ults_earned:
+                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                        seen_ult = True
                         times_to_ult.append(time_to_ult)
                         time_to_ult = 0
-                    else:
-                        if section[team][player].stats['ultimates_earned'][i] == section[team][player].stats['ultimates_used'][i]:
-                            time_to_ult += 1
-                prev_ults_earned = section[team][player].stats['ultimates_earned'][i]
+                    if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                        seen_ult = False
+                    if not seen_ult:
+                        time_to_ult += 1
+                            
         return times_to_ult
 
     # Get time ultimate held (in seconds) for each ultimate for given player
@@ -203,22 +205,23 @@ class MatrixAnalyzer:
             team = self.GetTeam(player)
         times_ult_held = []
         for section_num, section in enumerate(self.game.player_tracking):
-            time_ult_held = 0
-            for i in range(0, self.game.section_lengths[section_num]):
+            got_ult_times = []
+            used_ult_times = []
+            for i in range(1, self.game.section_lengths[section_num]):
                 should_do = True
                 if player in self.game.dupe_tracking[section_num]:
                     for dupe in self.game.dupe_tracking[section_num][player]:
                         if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_used'][i]:
-                        time_ult_held += 1
-                    else:
-                        if time_ult_held > 0:
-                            times_ult_held.append(time_ult_held)
-                            time_ult_held = 0
-        if time_ult_held > 0:
-            times_ult_held.append(time_ult_held)
+                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                        got_ult_times.append(i)
+                    if section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]:
+                        used_ult_times.append(i)
+            if len(got_ult_times) > len(used_ult_times):
+                used_ult_times.append(i)
+            for i in range(0, len(got_ult_times)):
+                times_ult_held.append(used_ult_times[i] - got_ult_times[i])
         return times_ult_held
 
     # Get average time to ultimate (in seconds) for given player

@@ -114,8 +114,8 @@ HEROTYPE_MAPS = {
 }
 ROLE_MAPS = {
     'main_tank': ['Reinhardt', 'Orisa', 'Winston', 'WreckingBall', 'Sigma', 'Roadhog', 'Zarya', 'D.Va'],
-    'hitscan_dps': ['Ashe', 'Widowmaker', 'McCree', 'Soldier76', 'Reaper', 'Tracer', 'Sombra', 'Bastion', 'Hanzo', 'Symmetra', 'Echo', 'Mei', 'Torbjorn', 'Pharah', 'Doomfist', 'Genji', 'Junkrat'],
-    'main_support': ['Lucio', 'Mercy', 'Brigitte', 'Zenyatta', 'Baptiste', 'Moira', 'Ana']
+    'hitscan_dps': ['Widowmaker', 'McCree', 'Ashe', 'Tracer', 'Soldier76', 'Reaper', 'Sombra', 'Bastion', 'Hanzo', 'Symmetra', 'Mei', 'Echo', 'Torbjorn', 'Pharah', 'Doomfist', 'Genji', 'Junkrat'],
+    'main_support': ['Lucio', 'Mercy', 'Brigitte', 'Baptiste', 'Moira', 'Ana', 'Zenyatta']
 }
 ROLE_MAPS['off_tank'] = ROLE_MAPS['main_tank'][::-1]
 ROLE_MAPS['flex_dps'] = ROLE_MAPS['hitscan_dps'][::-1]

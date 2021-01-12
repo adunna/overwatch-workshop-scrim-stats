@@ -3,18 +3,20 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-MJ = MatrixJSON("../samples/Rialto.txt")
+MJ = MatrixJSON("../samples/nXRSPb8yE00XzKOF.txt")
 MJ.DumpJSON()
 #pprint.pprint(MJ.DumpJSON())
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Rialto.txt")
-parseEngine.write_csv(game, '../samples/TEST.csv')
+game = parseEngine.readLog("../samples/nXRSPb8yE00XzKOF.txt")
 
 analyzer = MatrixAnalyzer(game)
 print(game.dupe_tracking)
-analyzer.WriteAuxillaryCSVs('../samples/TEST')
+print(analyzer.GetAverageTimeToUltimate('NecroDrake'))
+print(analyzer.GetTimesUltimateHeld('NecroDrake'))
+print(analyzer.GetAverageTimeUltimateHeld('NecroDrake'))
+#analyzer.WriteAuxillaryCSVs('../samples/TEST')
 
 # old
 #parseEngine = MatrixParser()
