@@ -150,36 +150,26 @@ class MatrixAnalyzer:
             team = self.GetTeam(player)
         ult_times = [] # [[(tsgotten, tsused), ...], ...] if tsused is -1 then ult wasn't used
         for section_num, section in enumerate(self.game.player_tracking):
-            earned_ults = []
-            used_ults = []
-            has_ult = False
+            ult_times_sec = []
+            ult_earned_ts = -1
             for i in range(1, self.game.section_lengths[section_num]):
                 should_do = True
                 if player in self.game.dupe_tracking[section_num]:
                     for dupe in self.game.dupe_tracking[section_num][player]:
                         if i >= dupe[0] + 1 and i <= dupe[1]:
                             should_do = False
-
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]: # got ultimate
-                        if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i] >= 250: # baby D.Va
-                            earned_ults.append(i)
-                            has_ult = True
-                    if has_ult and section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1]: # either swapped or used ult, or got demeched
-
-                        if section[team][player].stats['heroes'][i] != section[team][player].stats['heroes'][i-1]: # swapped
-                            if has_ult == True: # had ult and swapped, so did not use
-                                used_ults.append(-1)
-                        else: # same hero
-                            used_ults.append(i)
-
-                        has_ult = False
-
-            if has_ult:
-                used_ults.append(-1)
-            ult_times_sec = []
-            for i in range(0, len(earned_ults)):
-                ult_times_sec.append((earned_ults[i], used_ults[i]))
+                    if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-2] >= 250:
+                        if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                            ult_earned_ts = i
+                        if section[team][player].stats['ultimate_charge'][i] < section[team][player].stats['ultimate_charge'][i-1]:
+                            if section[team][player].stats['heroes'][i] == section[team][player].stats['heroes'][i-1]:
+                                ult_times_sec.append((ult_earned_ts, i))
+                            elif ult_earned_ts != -1:
+                                ult_times_sec.append((ult_earned_ts, -1))
+                            ult_earned_ts = -1
+            if ult_earned_ts != -1:
+                ult_times_sec.append((ult_earned_ts, -1))
             ult_times.append(ult_times_sec)
         return ult_times
 
@@ -209,12 +199,29 @@ class MatrixAnalyzer:
     def GetTimesToUltimate(self, player, team=None):
         if team == None:
             team = self.GetTeam(player)
-        ult_timing = self.GetUltTiming(player, team)
         times_to_ult = []
-        for section in ult_timing:
-            times_to_ult.append(section[0][0])
-            for i in range(1, len(section)):
-                times_to_ult.append(section[i][0] - section[i-1][1])
+        for section_num, section in enumerate(self.game.player_tracking):
+            time_to_ult = 0
+            seen_ult = False
+            for i in range(1, self.game.section_lengths[section_num]):
+                should_do = True
+                if player in self.game.dupe_tracking[section_num]:
+                    for dupe in self.game.dupe_tracking[section_num][player]:
+                        if i >= dupe[0] + 1 and i <= dupe[1]:
+                            should_do = False
+                if should_do:
+                    if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-2] >= 250:
+                        if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                            seen_ult = True
+                            times_to_ult.append(time_to_ult)
+                            time_to_ult = 0
+                        if section[team][player].stats['ultimate_charge'][i] < section[team][player].stats['ultimate_charge'][i-1]:
+                            seen_ult = False
+                            if section[team][player].stats['heroes'][i] != section[team][player].stats['heroes'][i-1]:
+                                time_to_ult = 0
+                        if not seen_ult:
+                            time_to_ult += 1
+
         return times_to_ult
 
     # Get time ultimate held (in seconds) for each ultimate for given player
@@ -222,12 +229,33 @@ class MatrixAnalyzer:
     def GetTimesUltimateHeld(self, player, team=None):
         if team == None:
             team = self.GetTeam(player)
-        ult_timing = self.GetUltTiming(player, team)
         times_ult_held = []
-        for section in ult_timing:
-            for i in range(0, len(section)):
-                if section[i][1] != -1:
-                    times_ult_held.append(section[i][1] - section[i][0])
+        for section_num, section in enumerate(self.game.player_tracking):
+            got_ult_times = []
+            used_ult_times = []
+            had_ult = False
+            for i in range(1, self.game.section_lengths[section_num]):
+                should_do = True
+                if player in self.game.dupe_tracking[section_num]:
+                    for dupe in self.game.dupe_tracking[section_num][player]:
+                        if i >= dupe[0] + 1 and i <= dupe[1]:
+                            should_do = False
+                if should_do:
+                    if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-2] >= 250:
+                        if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]:
+                            got_ult_times.append(i)
+                            had_ult = True
+                        if section[team][player].stats['ultimate_charge'][i] < section[team][player].stats['ultimate_charge'][i-1]:
+                            if section[team][player].stats['heroes'][i] == section[team][player].stats['heroes'][i-1]:
+                                used_ult_times.append(i)
+                            else:
+                                if had_ult:
+                                    got_ult_times.pop()
+                            had_ult = False
+            if len(got_ult_times) > len(used_ult_times):
+                used_ult_times.append(i)
+            for i in range(0, len(got_ult_times)):
+                times_ult_held.append(used_ult_times[i] - got_ult_times[i])
         return times_ult_held
 
     # Get average time to ultimate (in seconds) for given player
