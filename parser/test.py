@@ -14,13 +14,10 @@ game = parseEngine.readLog("../samples/tv0sp8sPuTxao8CC.txt")
 analyzer = MatrixAnalyzer(game)
 players = analyzer.GetPlayers()
 print(game.section_lengths)
-#print(players)
-#for team in players:
-#    for player in players[team]:
-#        print(player, analyzer.GetTimesToUltimate(player), analyzer.GetAverageTimeToUltimate(player), analyzer.GetTimesUltimateHeld(player), analyzer.GetAverageTimeUltimateHeld(player))
-print(analyzer.GetTimesToUltimate('Foxy'), analyzer.GetAverageTimeToUltimate('morneautron'), analyzer.GetTimesUltimateHeld('Foxy'), analyzer.GetAverageTimeUltimateHeld('morneautron'), analyzer.GetUltTiming('sheepie'))
-#print(analyzer.GetAverageTimeToUltimate('scoob'))
-#print(analyzer.GetAverageTimeUltimateHeld('scoob'))
+print(players)
+for team in players:
+    for player in players[team]:
+        print(player, analyzer.GetTimesToUltimate(player), analyzer.GetAverageTimeToUltimate(player), analyzer.GetTimesUltimateHeld(player), analyzer.GetAverageTimeUltimateHeld(player))
 #analyzer.WriteAuxillaryCSVs('../samples/TEST')
 
 # old
