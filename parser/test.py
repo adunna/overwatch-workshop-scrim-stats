@@ -18,7 +18,9 @@ print(players)
 for team in players:
     for player in players[team]:
         print(player, analyzer.GetTimesToUltimate(player), analyzer.GetAverageTimeToUltimate(player), analyzer.GetTimesUltimateHeld(player), analyzer.GetAverageTimeUltimateHeld(player))
-#analyzer.WriteAuxillaryCSVs('../samples/TEST')
+print(game.rez_tracking)
+analyzer.WriteAuxillaryCSVs('../samples/TEST')
+
 
 # old
 #parseEngine = MatrixParser()

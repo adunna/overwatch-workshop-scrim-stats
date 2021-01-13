@@ -69,8 +69,14 @@ class MatrixParser:
                         elif line[1] == "Resurrected": # hero rezzed
                             if line[2] not in game.overall_deaths[-1]:
                                 game.overall_deaths[-1][line[2]] = []
-                            elif len(game.overall_deaths[-1][line[2]]) > 0 and runningTS - game.overall_deaths[-1][line[2]][-1] <= 10:
-                                game.rez_tracking[-1].append((runningTS, line[2]))
+                            elif len(game.overall_deaths[-1][line[2]]) > 0 and runningTS - game.overall_deaths[-1][line[2]][-1] <= 10: # make sure player died recently
+                                # check that player was not rezzed recently
+                                not_rez = False
+                                for rez_point in game.rez_tracking[-1]:
+                                    if rez_point[1] == line[2] and runningTS - rez_point[0] <= 10:
+                                        not_rez = True
+                                if not not_rez:
+                                    game.rez_tracking[-1].append((runningTS, line[2]))
                         elif line[1] == "DuplicatingEnd": # end dupe
                             game.dupe_tracking[-1][line[2]][-1][1] = runningTS
                         else: # map info
