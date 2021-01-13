@@ -3,20 +3,22 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-MJ = MatrixJSON("../samples/Havana.txt")
-json_dump = MJ.DumpJSON()
-pprint.pprint(json_dump['final_stats'][0]['scoob'])
+#MJ = MatrixJSON("../samples/tv0sp8sPuTxao8CC.txt")
+#json_dump = MJ.DumpJSON()
+#pprint.pprint(json_dump['final_stats'][0]['scoob'])
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Havana.txt")
+game = parseEngine.readLog("../samples/tv0sp8sPuTxao8CC.txt")
 
 analyzer = MatrixAnalyzer(game)
 players = analyzer.GetPlayers()
-print(players)
-for team in players:
-    for player in players[team]:
-        print(player, analyzer.GetAverageTimeToUltimate(player), analyzer.GetAverageTimeUltimateHeld(player))
+print(game.section_lengths)
+#print(players)
+#for team in players:
+#    for player in players[team]:
+#        print(player, analyzer.GetTimesToUltimate(player), analyzer.GetAverageTimeToUltimate(player), analyzer.GetTimesUltimateHeld(player), analyzer.GetAverageTimeUltimateHeld(player))
+print(analyzer.GetTimesToUltimate('Foxy'), analyzer.GetAverageTimeToUltimate('morneautron'), analyzer.GetTimesUltimateHeld('Foxy'), analyzer.GetAverageTimeUltimateHeld('morneautron'), analyzer.GetUltTiming('sheepie'))
 #print(analyzer.GetAverageTimeToUltimate('scoob'))
 #print(analyzer.GetAverageTimeUltimateHeld('scoob'))
 #analyzer.WriteAuxillaryCSVs('../samples/TEST')
