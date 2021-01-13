@@ -9,7 +9,7 @@ import pprint
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/tv0sp8sPuTxao8CC.txt")
+game = parseEngine.readLog("../samples/APQi1bVMpSWZcw5m.txt")
 
 analyzer = MatrixAnalyzer(game)
 players = analyzer.GetPlayers()

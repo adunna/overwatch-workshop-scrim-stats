@@ -212,9 +212,10 @@ class MatrixAnalyzer:
         ult_timing = self.GetUltTiming(player, team)
         times_to_ult = []
         for section in ult_timing:
-            times_to_ult.append(section[0][0])
-            for i in range(1, len(section)):
-                times_to_ult.append(section[i][0] - abs(section[i-1][1]))
+            if len(section) > 0:
+                times_to_ult.append(section[0][0])
+                for i in range(1, len(section)):
+                    times_to_ult.append(section[i][0] - abs(section[i-1][1]))
         return times_to_ult
 
     # Get time ultimate held (in seconds) for each ultimate for given player
