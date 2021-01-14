@@ -161,7 +161,7 @@ class MatrixAnalyzer:
                             should_do = False
 
                 if should_do:
-                    if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]: # got ultimate
+                    if not has_ult and section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]: # got ultimate
                         if section[team][player].stats['heroes'][i] != 'D.Va' or (section[team][player].stats['max_health'][i] >= 250 and section[team][player].stats['max_health'][i-1] >= 250): # baby D.Va
                             earned_ults.append(i)
                             has_ult = True

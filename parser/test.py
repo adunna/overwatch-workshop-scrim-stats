@@ -3,13 +3,13 @@ from manalyzer import MatrixAnalyzer
 from mjsonifier import MatrixJSON
 import pprint
 
-MJ = MatrixJSON("../samples/Log-2021-01-13-19-45-23.txt")
+MJ = MatrixJSON("../samples/Log-2021-01-13-20-07-12.txt")
 json_dump = MJ.DumpJSON()
 #pprint.pprint(json_dump['final_stats'][0]['scoob'])
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2021-01-13-19-45-23.txt")
+game = parseEngine.readLog("../samples/Log-2021-01-13-20-07-12.txt")
 
 analyzer = MatrixAnalyzer(game)
 players = analyzer.GetPlayers()
