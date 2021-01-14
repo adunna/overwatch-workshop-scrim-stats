@@ -162,18 +162,18 @@ class MatrixAnalyzer:
 
                 if should_do:
                     if section[team][player].stats['ultimates_earned'][i] != section[team][player].stats['ultimates_earned'][i-1]: # got ultimate
-                        if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i] >= 250: # baby D.Va
+                        if section[team][player].stats['heroes'][i] != 'D.Va' or (section[team][player].stats['max_health'][i] >= 250 and section[team][player].stats['max_health'][i-1] >= 250): # baby D.Va
                             earned_ults.append(i)
                             has_ult = True
                     if has_ult and (section[team][player].stats['ultimates_used'][i] != section[team][player].stats['ultimates_used'][i-1] or (section[team][player].stats['ultimate_charge'][i] < section[team][player].stats['ultimate_charge'][i-1] and section[team][player].stats['heroes'][i] != 'D.Va')): # either swapped or used ult, or got demeched
+                        if section[team][player].stats['heroes'][i] != 'D.Va' or section[team][player].stats['max_health'][i-1] >= 250:
+                            if section[team][player].stats['heroes'][i] != section[team][player].stats['heroes'][i-1]: # swapped
+                                if has_ult == True: # had ult and swapped, so did not use
+                                    used_ults.append(-i)
+                            else: # same hero
+                                used_ults.append(i)
 
-                        if section[team][player].stats['heroes'][i] != section[team][player].stats['heroes'][i-1]: # swapped
-                            if has_ult == True: # had ult and swapped, so did not use
-                                used_ults.append(-i)
-                        else: # same hero
-                            used_ults.append(i)
-
-                        has_ult = False
+                            has_ult = False
 
             if has_ult:
                 used_ults.append(-1)
@@ -630,7 +630,7 @@ class MatrixAnalyzer:
     def WriteAuxillaryCSVs(self, out_base_filename):
         # get data
         fights = self.GetFights()
-        with open(out_base_filename + '_fights.csv', 'w') as o:
+        with open(out_base_filename + '_fights.csv', 'w', encoding='utf-8') as o:
             mapTypeSection = 'Section' if self.game.map_type == 'Control' else 'Attacker'
             o.write(
                 'Map,' + mapTypeSection + ',Fight,Start Timestamp,End Timestamp,Winner,First FB,First FB Hero,First Death,First Death Hero,First Ult Used,First Ult Used Hero'

@@ -196,7 +196,7 @@ class MatrixParser:
         return game
 
     def write_csv(self, game, out_filename):
-        with open(out_filename, 'w') as o:
+        with open(out_filename, 'w', encoding='utf-8') as o:
             o.write('Map,Section,Timestamp,Team,Player,Hero,Hero Damage Dealt,Barrier Damage Dealt,Damage Blocked,Damage Taken,Deaths,Eliminations,Final Blows,Environmental Deaths,Environmental Kills,Healing Dealt,Objective Kills,Solo Kills,Ultimates Earned,Ultimates Used,Healing Received,Ultimate Charge,Player Closest to Reticle,Cooldown 1,Cooldown 2,Position\n')
             for section in range(0, len(game.player_tracking)):
                 for ts in range(0, game.section_lengths[section]):
