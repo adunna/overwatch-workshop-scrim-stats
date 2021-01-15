@@ -37,7 +37,9 @@ class MatrixParser:
 
             for lineNumber, line in enumerate(PARSEDFILE):
 
-                if (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
+                if len(line) == 12:
+                    game.player_order = [line[0:6], line[6:]]
+                elif (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
                     game.map_tracking.append([])
                     game.player_tracking.append([{}, {}])
                     game.kill_tracking.append([])

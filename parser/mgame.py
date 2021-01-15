@@ -7,6 +7,7 @@ class MatrixGame:
         self.map = ""
         self.map_type = ""
         self.map_score = [0, 0]
+        self.player_order = [] # [[player, player, ...], [player, player, ...]]
         self.map_tracking = [] # [[mapinfo, ...], ...]
         self.kill_tracking = [] # [[(timestamp, killer, victim), ...], ...]
         self.rez_tracking = [] # [[(timestamp, rezzed), ...], ...]
