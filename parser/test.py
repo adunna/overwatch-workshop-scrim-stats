@@ -9,7 +9,7 @@ import pprint
 
 # new
 parseEngine = MatrixParser()
-game = parseEngine.readLog("../samples/Log-2021-01-14-21-44-33.txt")
+game = parseEngine.readLog("../samples/Log-2021-01-14-21-44-33.txt") #newest log for stability
 
 analyzer = MatrixAnalyzer(game)
 players = analyzer.GetPlayers()
@@ -18,7 +18,7 @@ print(game.player_order)
 for team in players:
     for player in players[team]:
         print(player, analyzer.GetTimesToUltimate(player), analyzer.GetAverageTimeToUltimate(player), analyzer.GetTimesUltimateHeld(player), analyzer.GetAverageTimeUltimateHeld(player))
-analyzer.WriteAuxillaryCSVs('../samples/TEST')
+#practice comment analyzer.WriteAuxillaryCSVs('../samples/TEST')
 
 
 # old
