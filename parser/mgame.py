@@ -1,6 +1,20 @@
 from mconsts import *
 
 class MatrixGame:
+    """Track a single scrimmage game instance, including map and player info.
+
+    A given section S refers to a KOTH map point, or an attack/defense side in
+    another map type. Each section will have a number of items contained in it,
+    done at each timestamp t. For example, map_tracking[0][46] would refer to
+    the point progress at 47 seconds into the first KOTH point, or the first
+    attack side of another map type.
+
+    Attributes: language: Overwatch client language constant, default LANG_EN.
+        map: string - Overwatch map name map_type: string - Overwatch map type (Hybrid, Control, Escort, Assault)
+        map_score: [int, int] - Final map score for [Team 1, Team 2]
+        player_order: [[MatrixPlayer, ...], [MatrixPlayer, ...]] - Player order to use in analyses and visualizations; can optionally be inferred
+        map_tracking: [[MatrixMapInfo, ...], [MatrixMapInfo, ...], ...] - Map information at each timestamp T within each section S
+    """
 
     def __init__(self):
         self.language = LANG_EN
