@@ -40,15 +40,15 @@ class MatrixParser:
                 if len(line) == 12:
                     game.player_order = [line[0:6], line[6:]]
                 elif (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
+                    for team in game.player_tracking[-1]:
+                        for player in team:
+                            game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
                     game.map_tracking.append([])
                     game.player_tracking.append([{}, {}])
                     game.kill_tracking.append([])
                     game.overall_deaths.append({})
                     game.rez_tracking.append([])
                     game.dupe_tracking.append({})
-                    for team in game.player_tracking[-1]:
-                        for player in team:
-                            game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
                     game.section_lengths.append(999999)
                     KD_track = [None, None]
                     runningTS = 0
@@ -80,7 +80,10 @@ class MatrixParser:
                                 if not not_rez:
                                     game.rez_tracking[-1].append((runningTS, line[2]))
                         elif line[1] == "DuplicatingEnd": # end dupe
-                            game.dupe_tracking[-1][line[2]][-1][1] = runningTS
+                            if line[2] not in game.dupe_tracking[-1]: # dupe did not stop before match end
+                                game.dupe_tracking[-2][line[2]][-1][1] = game.section_lengths[-2]
+                            else: # dupe stopped normally
+                                game.dupe_tracking[-1][line[2]][-1][1] = runningTS
                         else: # map info
                             game.map_tracking[-1].append(MatrixMapInfo())
                             if game.map_type == "Control":
