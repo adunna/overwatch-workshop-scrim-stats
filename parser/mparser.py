@@ -33,11 +33,15 @@ class MatrixParser:
             KD_track = [None, None] # [killer, victim]
             runningTS = 0
             prevRunningTS = 0
-            PARSEDFILE = [line.strip().split("]")[1][1:].split(",") for line in f]
+            PARSEDFILE = [line.strip().split("]")[1][1:].split(",") for line in f if line[0] == "["]
 
             for lineNumber, line in enumerate(PARSEDFILE):
 
-                if len(line) == 12:
+                if len(line) == 0: # empty line
+                    pass
+                elif line[0] == '': # no content
+                    pass
+                elif len(line) == 12: # player order
                     game.player_order = [line[0:6], line[6:]]
                 elif (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
                     for team in game.player_tracking[-1]:
