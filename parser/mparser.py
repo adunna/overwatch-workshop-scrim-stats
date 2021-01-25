@@ -129,6 +129,12 @@ class MatrixParser:
                                 playerTeam = line[21]
                         else:
                             playerTeam = "Team 1"
+                        if playerTeam not in game.team_names: # outdated but still has team names
+                            # need to infer new team names
+                            if len(game.player_tracking[-1][0]) == 0:
+                                game.team_names[0] = playerTeam
+                            else:
+                                game.team_names[1] = playerTeam
                         playerTeam = 0 if playerTeam == game.team_names[0] else 1
                         playerName = line[1]
                         if playerName not in game.player_tracking[-1][playerTeam]:
