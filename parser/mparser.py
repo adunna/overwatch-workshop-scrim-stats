@@ -33,22 +33,26 @@ class MatrixParser:
             KD_track = [None, None] # [killer, victim]
             runningTS = 0
             prevRunningTS = 0
-            PARSEDFILE = [line.strip()[11:].split(",") for line in f]
+            PARSEDFILE = [line.strip()[11:].split(",") for line in f if line[0] == "["]
 
             for lineNumber, line in enumerate(PARSEDFILE):
 
-                if len(line) == 12:
+                if len(line) == 0: # empty line
+                    pass
+                elif line[0] == '': # no content
+                    pass
+                elif len(line) == 12: # player order
                     game.player_order = [line[0:6], line[6:]]
                 elif (game.language == LANG_EN and line[0] == game.map) or (game.language == LANG_KR and line[0] in KR_REMAP_MAPS and KR_REMAP_MAPS[line[0]] == game.map): # new part of map / next side
+                    for team in game.player_tracking[-1]:
+                        for player in team:
+                            game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
                     game.map_tracking.append([])
                     game.player_tracking.append([{}, {}])
                     game.kill_tracking.append([])
                     game.overall_deaths.append({})
                     game.rez_tracking.append([])
                     game.dupe_tracking.append({})
-                    for team in game.player_tracking[-1]:
-                        for player in team:
-                            game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
                     game.section_lengths.append(999999)
                     KD_track = [None, None]
                     runningTS = 0
@@ -80,7 +84,10 @@ class MatrixParser:
                                 if not not_rez:
                                     game.rez_tracking[-1].append((runningTS, line[2]))
                         elif line[1] == "DuplicatingEnd": # end dupe
-                            game.dupe_tracking[-1][line[2]][-1][1] = runningTS
+                            if line[2] not in game.dupe_tracking[-1]: # dupe did not stop before match end
+                                game.dupe_tracking[-2][line[2]][-1][1] = game.section_lengths[-2]
+                            else: # dupe stopped normally
+                                game.dupe_tracking[-1][line[2]][-1][1] = runningTS
                         else: # map info
                             game.map_tracking[-1].append(MatrixMapInfo())
                             if game.map_type == "Control":
@@ -122,6 +129,12 @@ class MatrixParser:
                                 playerTeam = line[21]
                         else:
                             playerTeam = "Team 1"
+                        if playerTeam not in game.team_names: # outdated but still has team names
+                            # need to infer new team names
+                            if len(game.player_tracking[-1][0]) == 0:
+                                game.team_names[0] = playerTeam
+                            else:
+                                game.team_names[1] = playerTeam
                         playerTeam = 0 if playerTeam == game.team_names[0] else 1
                         playerName = line[1]
                         if playerName not in game.player_tracking[-1][playerTeam]:
