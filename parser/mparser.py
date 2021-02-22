@@ -9,7 +9,7 @@ class MatrixParser:
     def readLog(self, filename):
         game = MatrixGame()
         with open(filename, 'r', encoding='utf-8') as f:
-            firstline = next(f).strip().split("]")[1][1:].split(",")
+            firstline = next(f).strip()[11:].split(",")
             game.map = firstline[0]
             if game.map in KR_REMAP_MAPS:
                 game.map = KR_REMAP_MAPS[game.map]
@@ -33,7 +33,7 @@ class MatrixParser:
             KD_track = [None, None] # [killer, victim]
             runningTS = 0
             prevRunningTS = 0
-            PARSEDFILE = [line.strip().split("]")[1][1:].split(",") for line in f]
+            PARSEDFILE = [line.strip()[11:].split(",") for line in f]
 
             for lineNumber, line in enumerate(PARSEDFILE):
 
