@@ -21,11 +21,12 @@ class MatrixJSON:
         avg_time_ult_held = [{player: self.Analyzer.GetAverageTimeUltimateHeld(player, team) for player in players[team]} for team in players]
         inferred_roles = [self.Analyzer.GetInferRoles(team) for team in players]
         players_ordered = self.Analyzer.GetPlayerOrder(inferred_roles, players)
+        ult_timings_all = [{}, {}] # [team 0, team 1]
 
         team_damage_over_time = {
-                "team1": self.Analyzer.GetAllTotalDamages(team=0),
-                "team2": self.Analyzer.GetAllTotalDamages(team=1),
-                }
+            "team1": self.Analyzer.GetAllTotalDamages(team=0),
+            "team2": self.Analyzer.GetAllTotalDamages(team=1),
+        }
 
         # match events info
         # format each player into one group, for each team
@@ -79,6 +80,7 @@ class MatrixJSON:
         for team_num, team in enumerate(players_ordered):
             for player in team:
                 ult_timings = self.Analyzer.GetUltTiming(player, team_num)
+                ult_timings_all[team_num][player] = ult_timings
                 for section_num, section in enumerate(ult_timings):
                     for ultinfo in section:
                         # (ult_earned_ts, ult_used_ts)
@@ -105,4 +107,5 @@ class MatrixJSON:
                 "inferred_roles": inferred_roles,
                 "players_ordered": players_ordered,
                 "match_events": match_events,
+                "ult_timings": ult_timings_all,
                 }
