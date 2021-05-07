@@ -1,4 +1,10 @@
-# random consts
+from enum import IntEnum
+
+class Version(IntEnum):
+    PREV = 1
+    V0_6 = 2
+
+# analyzer
 
 HAS_ULT_CUTOFF = 90 # cutoff to determine if player has ultimate going into fight or not
 
@@ -6,6 +12,7 @@ HAS_ULT_CUTOFF = 90 # cutoff to determine if player has ultimate going into figh
 
 LANG_EN = 0
 LANG_KR = 1
+LANG_FR = 2
 KR_REMAP_MAPS = {
     '66번 국도': 'Route 66',
     '볼스카야 인더스트리': 'Volskaya Industries',

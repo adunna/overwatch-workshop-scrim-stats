@@ -17,18 +17,19 @@ class MatrixGame:
     """
 
     def __init__(self):
-        self.language = LANG_EN
+        self.version = Version.PREV
+        self.language = LANG_EN # TODO: make things into their own classes (ex. Map, Language, etc.)
         self.map = ""
         self.map_type = ""
         self.map_score = [0, 0]
         self.player_order = [] # [[player, player, ...], [player, player, ...]]
-        self.map_tracking = [] # [[mapinfo, ...], ...]
-        self.kill_tracking = [] # [[(timestamp, killer, victim), ...], ...]
-        self.rez_tracking = [] # [[(timestamp, rezzed), ...], ...]
-        self.dupe_tracking = [] # [{player: [[start_timestamp, end_timestamp, hero_duped], ...], ...}, ...]
-        self.player_tracking = [] # [[team1, team2], ...]
-        self.overall_deaths = [] # [{player: [ts, ...], ...}, ...]
-        self.section_lengths = []  # [N, ...] one number for each section
+        self.map_tracking = [[]] # [[mapinfo, ...], ...]
+        self.kill_tracking = [[]] # [[(timestamp, killer, victim), ...], ...]
+        self.rez_tracking = [[]] # [[(timestamp, rezzed), ...], ...]
+        self.dupe_tracking = [{}] # [{player: [[start_timestamp, end_timestamp, hero_duped], ...], ...}, ...]
+        self.player_tracking = [[{}, {}]] # [[team1, team2], ...]
+        self.overall_deaths = [{}] # [{player: [ts, ...], ...}, ...]
+        self.section_lengths = [999999]  # [N, ...] one number for each section
         self.team_names = [] # [team 1, team 2]
         # team format = {playerName: player, ...}
 
@@ -51,7 +52,18 @@ class MatrixMapInfo:
 class MatrixPlayer:
 
     STAT_TYPES = {
-        'number': set(['cooldown1', 'cooldown2', 'max_health']),
+        'number':
+        set([
+            'cooldown1',
+            'cooldown2',
+            'max_health',
+            'charge_ability1',
+            'charge_ability2',
+            'resource_primary',
+            'resource_secondary',
+            'resource_ability1',
+            'resource_ability2'
+        ]),
         'number_update':
         set([
             'hero_damage_dealt',
@@ -70,7 +82,9 @@ class MatrixPlayer:
             'ultimates_used',
             'healing_received',
             'ultimate_charge',
-            'hero_damage_dealt'
+            'offensive_assists',
+            'defensive_assists',
+            'weapon_accuracy'
         ]),
         'string': set(['heroes', 'player_closest_reticle']),
         'vector': set(['position'])
@@ -102,5 +116,14 @@ class MatrixPlayer:
             'cooldown1': [],
             'cooldown2': [],
             'max_health': [],
+            'offensive_assists': [],
+            'defensive_assists': [],
+            'charge_ability1': [],
+            'charge_ability2': [],
+            'resource_primary': [],
+            'resource_secondary': [],
+            'resource_ability1': [],
+            'resource_ability2': [],
+            'weapon_accuracy': []
         }
         self.dc_stats = {x: None for x in self.stats}
