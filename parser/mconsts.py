@@ -127,3 +127,36 @@ ROLE_MAPS = {
 ROLE_MAPS['off_tank'] = ROLE_MAPS['main_tank'][::-1]
 ROLE_MAPS['flex_dps'] = ROLE_MAPS['hitscan_dps'][::-1]
 ROLE_MAPS['flex_support'] = ROLE_MAPS['main_support'][::-1]
+
+# stat number maps
+
+STAT_NUMBER_MAPS = {
+    'hero_damage_dealt': 3,
+    'barrier_damage_dealt': 4,
+    'damage_blocked': 5,
+    'damage_taken': 6,
+    'deaths': 7,
+    'eliminations': 8,
+    'final_blows': 9,
+    'environmental_deaths': 10,
+    'environmental_kills': 11,
+    'healing_dealt': 12,
+    'objective_kills': 13,
+    'solo_kills': 14,
+    'ultimates_earned': 15,
+    'ultimates_used': 16,
+    'healing_received': 17,
+    'ultimate_charge': 18,
+    'player_closest_reticle': 19,
+    'cooldown1': 24,
+    'cooldown2': 25,
+    'offensive_assists': 27,
+    'defensive_assists': 28,
+    'charge_ability1': 29,
+    'charge_ability2': 30,
+    'resource_primary': 31,
+    'resource_secondary': 32,
+    'resource_ability1': 33,
+    'resource_ability2': 34,
+    'weapon_accuracy': 35
+}

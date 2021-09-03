@@ -24,7 +24,7 @@ class MatrixGame:
         self.map_score = [0, 0]
         self.player_order = [] # [[player, player, ...], [player, player, ...]]
         self.map_tracking = [[]] # [[mapinfo, ...], ...]
-        self.kill_tracking = [[]] # [[(timestamp, killer, victim), ...], ...]
+        self.kill_tracking = [[]] # [[(timestamp, killer, victim, cause), ...], ...]
         self.rez_tracking = [[]] # [[(timestamp, rezzed), ...], ...]
         self.dupe_tracking = [{}] # [{player: [[start_timestamp, end_timestamp, hero_duped], ...], ...}, ...]
         self.player_tracking = [[{}, {}]] # [[team1, team2], ...]

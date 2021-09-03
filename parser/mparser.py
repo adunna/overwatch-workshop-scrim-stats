@@ -22,6 +22,7 @@ class MatrixParser:
 
         # Initialize game
         game = MatrixGame()
+        KOTH_SECTION = ''
         TRACK_KILLER = None
         TRACK_VICTIM = None
         runningTS = 0
@@ -42,6 +43,8 @@ class MatrixParser:
         # Set team names
         if len(PARSED_LINES[0]) == 3 or len(PARSED_LINES[0]) == 4:
             game.team_names = [PARSED_LINES[0][1], PARSED_LINES[0][2]]
+            if len(PARSED_LINES[0]) == 4:
+                KOTH_SECTION = PARSED_LINES[0][3]
         else:
             if game.language == LANG_EN:
                 game.team_names = ["Team 1", "Team 2"]
@@ -61,6 +64,7 @@ class MatrixParser:
                 for team in game.player_tracking[-1]:
                     for player in team:
                         game.section_lengths[-1] = min(game.section_lengths[-1], len(team[player].stats['heroes']))
+                        #game.section_lengths[-1] = min([game.section_lengths[-1]] + [len(team[player].stats[stat]) for stat in team[player].stats if len(team[player].stats[stat]) != 0])
                 game.map_tracking.append([])
                 game.player_tracking.append([{}, {}])
                 game.kill_tracking.append([])
@@ -72,6 +76,7 @@ class MatrixParser:
                 TRACK_VICTIM = None
                 runningTS = 0
                 prevRunningTS = 0
+                KOTH_SECTION = line[3]
             else:
                 timestamp = float(line[0])
                 if len(line) == 3:
@@ -84,7 +89,7 @@ class MatrixParser:
                     elif line[2] == "FinalBlow": # hero final blow
                         TRACK_KILLER = line[1]
                     elif line[1] == "Suicide": # hero suicide
-                        game.kill_tracking[-1].append((runningTS, line[2], line[2]))
+                        game.kill_tracking[-1].append((runningTS, line[2], line[2], 'Suicide'))
                         if line[2] not in game.overall_deaths[-1]:
                             game.overall_deaths[-1][line[2]] = []
                         game.overall_deaths[-1][line[2]].append(runningTS)
@@ -106,6 +111,7 @@ class MatrixParser:
                             game.dupe_tracking[-1][line[2]][-1][1] = runningTS
                     else: # map info
                         game.map_tracking[-1].append(MatrixMapInfo())
+                        game.map_tracking[-1][-1].point_number = KOTH_SECTION
                         if game.map_type == "Control":
                             game.map_tracking[-1][-1].team1Capture = float(line[1])
                             game.map_tracking[-1][-1].team2Capture = float(line[2])
@@ -118,7 +124,7 @@ class MatrixParser:
                                 game.map_tracking[-1][-1].pointCaptured = True
 
                     if TRACK_KILLER is not None and TRACK_VICTIM is not None:
-                        game.kill_tracking[-1].append((runningTS, TRACK_KILLER, TRACK_VICTIM))
+                        game.kill_tracking[-1].append((runningTS, TRACK_KILLER, TRACK_VICTIM, 'Unknown'))
                         TRACK_KILLER = None
                         TRACK_VICTIM = None
 
@@ -133,7 +139,7 @@ class MatrixParser:
 
                 elif len(line) == 5:
                     if line[1] == "FinalBlow":
-                        game.kill_tracking[-1].append((runningTS, line[2], line[3])) # later will add what died to, which is line[4]
+                        game.kill_tracking[-1].append((runningTS, line[2], line[3], line[4])) # later will add what died to, which is line[4]
                         if line[3] not in game.overall_deaths[-1]:
                             game.overall_deaths[-1][line[3]] = []
                         game.overall_deaths[-1][line[3]].append(runningTS)
@@ -171,6 +177,12 @@ class MatrixParser:
                                 game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(line[2])
                         elif game.language == LANG_KR:
                             game.player_tracking[-1][playerTeam][playerName].stats['heroes'].append(KR_REMAP_HEROES[line[2]])
+                        
+                        # Patch numbers that are asterisks
+                        for stat in STAT_NUMBER_MAPS:
+                            if STAT_NUMBER_MAPS[stat] < len(line) and '*' in line[STAT_NUMBER_MAPS[stat]] and len(game.player_tracking[-1][playerTeam][playerName].stats['hero_damage_dealt']) != 0:
+                                line[STAT_NUMBER_MAPS[stat]] = str(game.player_tracking[-1][playerTeam][playerName].stats[stat][-1])                                
+
                         game.player_tracking[-1][playerTeam][playerName].stats['hero_damage_dealt'].append(float(line[3]))
                         game.player_tracking[-1][playerTeam][playerName].stats['barrier_damage_dealt'].append(float(line[4]))
                         game.player_tracking[-1][playerTeam][playerName].stats['damage_blocked'].append(float(line[5]))
