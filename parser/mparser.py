@@ -15,6 +15,7 @@ class MatrixParser:
         with open(filename, 'r', encoding='utf-8') as f:
             for line in f:
                 if line[0] == '[':
+                    line.replace('McCree', 'Cassidy')
                     if ',' in line:
                         PARSED_LINES.append(line.strip()[11:].split(','))
                     else:
